@@ -1,4 +1,4 @@
-namespace Crawler.Models;
+namespace Shared.Models;
 
 public class Story
 {

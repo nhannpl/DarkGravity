@@ -1,4 +1,4 @@
-using Crawler.Models;
+using Shared.Models;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System.Text.Json;
