@@ -9,6 +9,7 @@ public class Story
     public string Url { get; set; } = string.Empty;
     public string BodyText { get; set; } = string.Empty;
     public string AiAnalysis { get; set; } = string.Empty; // New AI Field
+    public double? ScaryScore { get; set; } // New Parsed Score
     public int Upvotes { get; set; }
     public DateTime FetchedAt { get; set; } = DateTime.UtcNow;
 }

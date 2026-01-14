@@ -3,6 +3,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System.Text.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Crawler.Services;
 
@@ -29,45 +30,46 @@ public class StoryAnalyzer
         }
     }
 
-    public async Task<string> AnalyzeAsync(Story story)
+    public async Task<(string Analysis, double? Score)> AnalyzeAsync(Story story)
     {
+        string analysis = "No analysis";
+        
         // 1. Try Gemini (Direct HTTP)
         if (!string.IsNullOrEmpty(_geminiKey))
         {
-            return await AnalyzeWithGeminiDirectAsync(story);
+            analysis = await AnalyzeWithGeminiDirectAsync(story);
         }
-
         // 2. Try OpenAI (Semantic Kernel)
-        if (_openaiKernel != null)
+        else if (_openaiKernel != null)
         {
             try
             {
-                var prompt = $"Analyze this horror story. Is it Ghost/Slasher/Monster? Score 1-10. Title: {story.Title}. Body: {story.BodyText.Substring(0, Math.Min(300, story.BodyText.Length))}";
+                var prompt = $"Analyze this horror story. 1. Is it a Ghost, Slasher, or Monster story? 2. Give it a 'Scary Score' from 1-10.\n\nTitle: {story.Title}\nBody: {story.BodyText.Substring(0, Math.Min(300, story.BodyText.Length))}...";
                 var result = await _openaiKernel.InvokePromptAsync(prompt);
-                return result.ToString();
+                analysis = result.ToString();
             }
             catch (Exception ex)
             {
-                return $"OpenAI Error: {ex.Message}";
+                analysis = $"OpenAI Error: {ex.Message}";
             }
         }
+        else
+        {
+            // 3. Fallback
+            analysis = "MOCK ANALYSIS: Very scary! (Score: 8.0/10)";
+        }
 
-        // 3. Fallback
-        return "MOCK ANALYSIS: Very scary! (Score: 8/10)";
+        // Parse Score
+        var score = ParseScore(analysis);
+        return (analysis, score);
     }
 
     private async Task<string> AnalyzeWithGeminiDirectAsync(Story story)
     {
         try
         {
-            var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"; // Updated model name for stability
-            
-            // Note: Using gemini-3-flash-preview or similar if preferred, but gemini-pro is standard.
-            // Original code used: gemini-3-flash-preview
-            // I will stick to what was there or standard. User had gemini-3-flash-preview. 
-            // I'll revert to that to be safe, or use the variable from previous file if I recall it.
-            // Step 15: "gemini-3-flash-preview".
-            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
+            // Using gemini-3-flash-preview as before
+            var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
 
             var payload = new
             {
@@ -96,8 +98,6 @@ public class StoryAnalyzer
 
             using var doc = JsonDocument.Parse(responseString);
             
-            // Navigate JSON: candidates[0].content.parts[0].text
-            // Add safety check
             if (doc.RootElement.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
             {
                  var text = candidates[0]
@@ -113,5 +113,16 @@ public class StoryAnalyzer
         {
             return $"Gemini Exception: {ex.Message}";
         }
+    }
+
+    private double? ParseScore(string text)
+    {
+        // Look for "Score: 7.5/10" or "Score: 7.5" or "7.5/10"
+        var match = Regex.Match(text, @"Score[:\s]*(\d+(\.\d+)?)", RegexOptions.IgnoreCase);
+        if (match.Success && double.TryParse(match.Groups[1].Value, out double score))
+        {
+            return score;
+        }
+        return null;
     }
 }

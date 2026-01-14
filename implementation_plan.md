@@ -22,7 +22,7 @@ You requested a smaller, step-by-step approach. We will build this project **ite
 3.  Save the AI's response to the database.
 4.  **Verify**: Check the database for the AI's analysis.
 
-## Phase 4: The Web API
+## Phase 4: The Web API [COMPLETED]
 **Goal**: Make the data accessible to a website via a RESTful API.
 **Prerequisite**: We need to share the `Story` model and `AppDbContext` between the Crawler and the API.
 
@@ -46,7 +46,7 @@ You requested a smaller, step-by-step approach. We will build this project **ite
     *   `GET /api/stories/{id}`: Returns full story details.
 3.  **Swagger**: Ensure Swagger UI is enabled for easy testing.
 
-### 4.4. Verify
+### 4.4. Verify [COMPLETED]
 1.  Run the API project.
 2.  Open `http://localhost:xxxx/swagger`.
 3.  Execute `GET /api/stories` and confirm we see the Reddit stories fetched by the Crawler.
@@ -57,12 +57,12 @@ You requested a smaller, step-by-step approach. We will build this project **ite
 2.  Fetch data from our `GET /stories` API.
 3.  Display the stories in a list.
 
-## Phase 6: Scaling Up 
+## Phase 6: Scaling Up (The "Resume" Features)
 **Goal**: *Now* we add the advanced enterprise features.
 1.  Introduce **Kafka** to decouple the Crawler from the AI.
 2.  Add **Vector Search** for "Vibe" matching.
 3.  Add **Power Platform** for the admin dashboard.
 
 ---
-**Current Status**: Ready to start Phase 4.
-**Action**: Create the Web API project.
+**Current Status**: Ready to start Phase 5.
+**Action**: Create the Angular Frontend.

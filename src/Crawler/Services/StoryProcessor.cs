@@ -1,5 +1,6 @@
 using Shared.Data;
 using Shared.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Crawler.Services;
 
@@ -21,7 +22,7 @@ public class StoryProcessor : IStoryProcessor
 
     public async Task ProcessAndSaveStoriesAsync(List<Story> stories)
     {
-        await _db.Database.EnsureCreatedAsync();
+        await _db.Database.MigrateAsync();
 
         foreach (var story in stories)
         {
@@ -35,7 +36,8 @@ public class StoryProcessor : IStoryProcessor
             Console.WriteLine($"   [NEW] Processing: {story.Title}...");
             
             // Delegate analysis to the analyzer service
-            story.AiAnalysis = await _analyzer.AnalyzeAsync(story);
+            // Delegate analysis to the analyzer service
+            (story.AiAnalysis, story.ScaryScore) = await _analyzer.AnalyzeAsync(story);
 
             _db.Stories.Add(story);
         }
