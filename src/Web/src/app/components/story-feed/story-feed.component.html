@@ -16,7 +16,7 @@
 
     <div *ngIf="!loading() && filteredStories().length > 0" class="story-grid">
         <article *ngFor="let story of filteredStories(); let i = index" class="story-card glass fade-in"
-            [style.animation-delay]="i * 0.1 + 's'">
+            [style.animation-delay]="i * 0.1 + 's'" [routerLink]="['/story', story.id]">
 
             <div class="card-glow"></div>
 
@@ -25,13 +25,13 @@
                     <span class="scary-tag" [attr.data-level]="getScaryLevel(story.scaryScore)">
                         {{ getScaryLevel(story.scaryScore) }}
                     </span>
-                    <span class="story-date">{{ story.createdAt | date:'MMM d' }}</span>
+                    <span class="story-date">{{ story.fetchedAt | date:'MMM d' }}</span>
                 </div>
 
                 <h3 class="story-title">{{ story.title }}</h3>
 
                 <p class="story-excerpt">
-                    {{ story.storyContent | slice:0:150 }}...
+                    {{ story.bodyText | slice:0:150 }}...
                 </p>
 
                 <div class="card-footer">
@@ -43,7 +43,7 @@
                         <div class="score-value">{{ story.scaryScore }}/10</div>
                     </div>
 
-                    <button class="read-btn">
+                    <button class="read-btn" [routerLink]="['/story', story.id]">
                         READ TRACE
                     </button>
                 </div>

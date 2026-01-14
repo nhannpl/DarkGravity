@@ -1,0 +1,63 @@
+<div class="reader-container">
+  <div *ngIf="loading()" class="reader-skeleton fade-in">
+    <div class="skeleton-title glass"></div>
+    <div class="skeleton-line glass"></div>
+    <div class="skeleton-line glass"></div>
+    <div class="skeleton-line glass"></div>
+  </div>
+
+  <article *ngIf="!loading() && story()" class="story-trace fade-in">
+    <header class="reader-header">
+      <a routerLink="/" class="back-link">← RETURN TO FEED</a>
+
+      <div class="metadata-bar">
+        <span class="scary-tag" [attr.data-level]="getScaryLevel(story()!.scaryScore)">
+          {{ getScaryLevel(story()!.scaryScore) }} ANOMALY
+        </span>
+        <span class="separator">/</span>
+        <span class="author-tag">TRANSIMITTED BY: {{ story()!.author }}</span>
+        <span class="separator">/</span>
+        <span class="date-tag">{{ story()!.fetchedAt | date:'HH:mm:ss MMMM d, yyyy' }}</span>
+      </div>
+
+      <h1 class="story-title">{{ story()!.title }}</h1>
+    </header>
+
+    <div class="ai-analysis-box glass">
+      <div class="analysis-header">
+        <span class="ai-icon">✧</span>
+        AI INSIGHT (SOCRATES LITE)
+      </div>
+      <p class="analysis-text">{{ story()!.aiAnalysis }}</p>
+      <div class="score-grid">
+        <div class="score-item">
+          <span class="label">SCARY SCORE</span>
+          <span class="value">{{ story()!.scaryScore }}/10</span>
+        </div>
+        <div class="score-bar-container">
+          <div class="score-bar" [style.width.%]="story()!.scaryScore * 10"></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="story-body">
+      <p class="paragraph" *ngFor="let para of story()!.bodyText.split('\n')">
+        {{ para }}
+      </p>
+    </section>
+
+    <footer class="reader-footer">
+      <div class="trace-end">END OF TRACE</div>
+      <div class="actions">
+        <button class="action-btn glass">SAVE TO SHADOWS</button>
+        <a [href]="story()!.url" target="_blank" class="action-btn glass">ORIGINAL SOURCE</a>
+      </div>
+    </footer>
+  </article>
+
+  <div *ngIf="!loading() && !story()" class="error-state fade-in">
+    <h2>TRACE CORRUPTION</h2>
+    <p>The requested story transmission was lost in the void.</p>
+    <a routerLink="/" class="back-link">RETURN TO FEED</a>
+  </div>
+</div>

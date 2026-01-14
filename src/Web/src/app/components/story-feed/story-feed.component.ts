@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { StoryService } from '../../services/story.service';
 import { SearchService } from '../../services/search.service';
 import { Story } from '../../models/story.model';
@@ -7,7 +8,7 @@ import { Story } from '../../models/story.model';
 @Component({
     selector: 'app-story-feed',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, RouterLink],
     templateUrl: './story-feed.component.html',
     styleUrl: './story-feed.component.css'
 })
@@ -26,7 +27,7 @@ export class StoryFeedComponent implements OnInit {
 
         return stories.filter(s =>
             s.title.toLowerCase().includes(query) ||
-            s.storyContent.toLowerCase().includes(query)
+            s.bodyText.toLowerCase().includes(query)
         );
     });
 

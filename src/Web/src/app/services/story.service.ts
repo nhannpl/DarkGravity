@@ -23,7 +23,7 @@ export class StoryService {
     );
   }
 
-  getStoryById(id: number): Observable<Story> {
+  getStoryById(id: string): Observable<Story> {
     return this.http.get<Story>(`${this.apiUrl}/${id}`);
   }
 }

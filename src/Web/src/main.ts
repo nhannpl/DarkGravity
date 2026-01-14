@@ -3,4 +3,9 @@ import { appConfig } from './app/app.config';
 import { App } from './app/app';
 
 bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+  .then(() => {
+    console.log('Void initialized successfully.');
+  })
+  .catch((err) => {
+    console.error('The Void failed to initialize:', err);
+  });

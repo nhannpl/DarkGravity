@@ -1,11 +1,11 @@
 export interface Story {
-  id: number;
+  id: string; // Guid as string
   title: string;
   author: string;
-  storyContent: string;
+  bodyText: string;
   url: string;
-  isScary: boolean;
   aiAnalysis: string;
   scaryScore: number;
-  createdAt: string;
+  fetchedAt: string;
+  upvotes: number;
 }
