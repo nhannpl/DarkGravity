@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { StoryService } from '../../services/story.service';
+import { TtsService } from '../../services/tts.service';
 import { Story } from '../../models/story.model';
 import { MarkdownPipe } from '../../pipes/markdown.pipe';
 
@@ -13,10 +14,11 @@ import { MarkdownPipe } from '../../pipes/markdown.pipe';
   templateUrl: './story-reader.component.html',
   styleUrl: './story-reader.component.css'
 })
-export class StoryReaderComponent implements OnInit {
+export class StoryReaderComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private storyService = inject(StoryService);
   private sanitizer = inject(DomSanitizer);
+  public tts = inject(TtsService);
 
   story = signal<Story | null>(null);
   loading = signal<boolean>(true);
@@ -74,5 +76,34 @@ export class StoryReaderComponent implements OnInit {
     if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YOUTUBE';
     if (url.includes('reddit.com')) return 'REDDIT';
     return 'VOID';
+  }
+
+  readStory() {
+    const s = this.story();
+    if (s) {
+      this.tts.speak(s.bodyText);
+    }
+  }
+
+  pauseStory() {
+    this.tts.pause();
+  }
+
+  resumeStory() {
+    this.tts.resume();
+  }
+
+  stopStory() {
+    this.tts.stop();
+  }
+
+  onSeek(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = parseFloat(target.value);
+    this.tts.seek(value);
+  }
+
+  ngOnDestroy(): void {
+    this.tts.stop();
   }
 }

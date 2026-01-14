@@ -58,11 +58,39 @@
       </div>
     </div>
     
-    <div class="transcript-toggle" (click)="toggleTranscript()" [class.open]="isTranscriptOpen()">
-      <div class="content-label">
+    <div class="transcript-toggle" [class.open]="isTranscriptOpen()">
+      <div class="content-label" (click)="toggleTranscript()">
         <span class="label-icon">▤</span>
         {{ getStorySource(story()!.url) === 'YOUTUBE' ? 'DECRYPTED TRANSCRIPT' : 'ARCHIVED STORY LOG' }}
         <span class="dropdown-arrow">{{ isTranscriptOpen() ? '▼' : '▶' }}</span>
+      </div>
+      <div class="tts-controls" *ngIf="isTranscriptOpen()">
+        <button *ngIf="!tts.isPlaying()" (click)="readStory()" class="tts-btn glass" title="Listen to Trace">
+          <span class="icon">▶</span> LISTEN TO TRACE
+        </button>
+      
+        <ng-container *ngIf="tts.isPlaying()">
+          <div class="control-group">
+            <button *ngIf="!tts.isPaused()" (click)="pauseStory()" class="tts-btn glass icon-only" title="Pause">
+              <span class="icon">⏸</span>
+            </button>
+            <button *ngIf="tts.isPaused()" (click)="resumeStory()" class="tts-btn glass icon-only" title="Resume">
+              <span class="icon">▶</span>
+            </button>
+      
+            <div class="tts-seeker-container">
+              <input type="range" class="tts-seeker" [value]="tts.progress()" (input)="onSeek($event)" min="0" max="100"
+                step="0.5">
+              <div class="seeker-track">
+                <div class="seeker-fill" [style.width.%]="tts.progress()"></div>
+              </div>
+            </div>
+      
+            <button (click)="stopStory()" class="tts-btn glass stop-btn icon-only" title="Stop">
+              <span class="icon">⏹</span>
+            </button>
+          </div>
+        </ng-container>
       </div>
     </div>
     
