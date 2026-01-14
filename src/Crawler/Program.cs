@@ -1,53 +1,38 @@
-﻿using Crawler;
+﻿using Crawler.Data;
+using Crawler.Models;
+using Crawler.Services;
 
-Console.WriteLine("�️ Spider Starting (Database Mode)...");
+Console.WriteLine("🕷️ Spider Starting (Modular Edition)...");
 
-// 1. Setup Database
+// 1. Dependency Injection Setup
 using var db = new AppDbContext();
-Console.WriteLine("📦 Connecting to SQL Server...");
-// This line automatically creates the DB if it doesn't exist (Code-First)
-bool created = await db.Database.EnsureCreatedAsync();
-if (created) Console.WriteLine("   -> Database created!");
-else Console.WriteLine("   -> Database already exists.");
-
-// 2. Run Crawler
 using var client = new HttpClient();
 client.DefaultRequestHeaders.Add("User-Agent", "MyCrawler/1.0");
 
-var service = new RedditService(client);
-string url = "https://www.reddit.com/r/nosleep/top.json?limit=5&t=day";
+var redditService = new RedditService(client);
+var analyzer = new StoryAnalyzer(client);
+var processor = new StoryProcessor(db, analyzer);
 
-Console.WriteLine("Fetching stories...");
-var stories = await service.GetTopStoriesAsync(url);
-
-// 3. Save to DB
-int newCount = 0;
-foreach (var story in stories)
+// 2. Execution
+try
 {
-    // Check if we already have this story (avoid duplicates)
-    var exists = db.Stories.Any(s => s.ExternalId == story.ExternalId);
-    if (!exists)
-    {
-        db.Stories.Add(story);
-        Console.WriteLine($"   [NEW] {story.Title}");
-        newCount++;
-    }
-    else
-    {
-        Console.WriteLine($"   [SKIP] {story.Title}");
-    }
+    Console.WriteLine("Fetching stories...");
+    string url = "https://www.reddit.com/r/nosleep/top.json?limit=3&t=day";
+    var stories = await redditService.GetTopStoriesAsync(url);
+
+    Console.WriteLine($"Found {stories.Count} stories. Processing...");
+    await processor.ProcessAndSaveStoriesAsync(stories);
+
+    Console.WriteLine("\n✅ Job Complete.");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"🔥 Fatal Error: {ex.Message}");
 }
 
-// Commit changes
-await db.SaveChangesAsync();
-Console.WriteLine($"✅ Saved {newCount} new stories.");
-
-// 4. READ BACK (To show you the DB)
+// 3. View Results (Verification)
 Console.WriteLine($"\n📊 VIEWING DATABASE CONTENTS:");
-var allStories = db.Stories.OrderByDescending(s => s.Upvotes).ToList();
-foreach (var s in allStories)
+foreach (var s in db.Stories)
 {
-    Console.WriteLine($"ID: {s.Id} | {s.Title} ({s.Upvotes} ups)");
+    Console.WriteLine($"ID: {s.Id} | {s.Title} | AI: {s.AiAnalysis}");
 }
-
-Console.WriteLine("Done.");

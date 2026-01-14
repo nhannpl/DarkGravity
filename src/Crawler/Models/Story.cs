@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-
-namespace Crawler;
+namespace Crawler.Models;
 
 public class Story
 {
@@ -10,17 +8,7 @@ public class Story
     public string Author { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
     public string BodyText { get; set; } = string.Empty;
+    public string AiAnalysis { get; set; } = string.Empty; // New AI Field
     public int Upvotes { get; set; }
     public DateTime FetchedAt { get; set; } = DateTime.UtcNow;
-}
-
-public class AppDbContext : DbContext
-{
-    public DbSet<Story> Stories { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // Connecting to the Docker container we just started
-        optionsBuilder.UseSqlServer("Server=localhost,1433;Database=DarkGravityDb;User Id=sa;Password=REMOVED_PASSWORD;TrustServerCertificate=True;");
-    }
 }

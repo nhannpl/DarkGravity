@@ -1,0 +1,11 @@
+{
+    "profiles": {
+        "Crawler": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "GEMINI_API_KEY": "REMOVED_SECRET",
+                "OPENAI_API_KEY": ""
+            }
+        }
+    }
+}

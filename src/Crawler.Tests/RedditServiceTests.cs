@@ -1,7 +1,8 @@
 using Moq;
 using Moq.Contrib.HttpClient;
 using Xunit;
-using Crawler;
+using Crawler.Models;
+using Crawler.Services;
 
 namespace Crawler.Tests;
 

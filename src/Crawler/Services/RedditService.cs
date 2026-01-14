@@ -1,6 +1,8 @@
+using Crawler.Data;
+using Crawler.Models;
 using System.Text.Json;
 
-namespace Crawler;
+namespace Crawler.Services;
 
 public class RedditService
 {
