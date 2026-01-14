@@ -17,18 +17,28 @@ var processor = new StoryProcessor(db, analyzer);
 // 2. Execution
 try
 {
-    // Fetch from Reddit
-    Console.WriteLine("--- Fetching from Reddit (r/nosleep) ---");
-    string redditUrl = "https://www.reddit.com/r/nosleep/top.json?limit=2&t=day";
-    var redditStories = await redditService.GetTopStoriesAsync(redditUrl);
-    Console.WriteLine($"Found {redditStories.Count} Reddit stories.");
-    await processor.ProcessAndSaveStoriesAsync(redditStories);
+    // config
+    var subreddits = new[] { "nosleep", "shortscarystories", "libraryofshadows", "scarystories" };
+    var ytQueries = new[] { "MrBallen horror stories", "Lazy Masquerade horror stories", "The Dark Somnium", "Lighthouse Horror" };
 
-    // Fetch from YouTube (MrBallen)
-    Console.WriteLine("\n--- Fetching from YouTube (MrBallen) ---");
-    var ytStories = await youtubeService.GetStoriesFromChannelAsync("MrBallen horror stories", 2);
-    Console.WriteLine($"Found {ytStories.Count} YouTube stories.");
-    await processor.ProcessAndSaveStoriesAsync(ytStories);
+    // Fetch from Reddit
+    foreach (var sub in subreddits)
+    {
+        Console.WriteLine($"--- Fetching from Reddit (r/{sub}) ---");
+        string redditUrl = $"https://www.reddit.com/r/{sub}/top.json?limit=2&t=day";
+        var redditStories = await redditService.GetTopStoriesAsync(redditUrl);
+        Console.WriteLine($"Found {redditStories.Count} Reddit stories in r/{sub}.");
+        await processor.ProcessAndSaveStoriesAsync(redditStories);
+    }
+
+    // Fetch from YouTube
+    foreach (var query in ytQueries)
+    {
+        Console.WriteLine($"\n--- Fetching from YouTube ({query}) ---");
+        var ytStories = await youtubeService.GetStoriesFromChannelAsync(query, 2);
+        Console.WriteLine($"Found {ytStories.Count} YouTube stories for '{query}'.");
+        await processor.ProcessAndSaveStoriesAsync(ytStories);
+    }
 
     Console.WriteLine("\n✅ Job Complete.");
 }
