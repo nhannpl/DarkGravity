@@ -22,9 +22,16 @@
 
             <div class="card-content">
                 <div class="card-header">
-                    <span class="scary-tag" [attr.data-level]="getScaryLevel(story.scaryScore)">
-                        {{ getScaryLevel(story.scaryScore) }}
-                    </span>
+                    <div class="header-tags">
+                        <span class="scary-tag" [attr.data-level]="getScaryLevel(story.scaryScore)">
+                            {{ getScaryLevel(story.scaryScore) }}
+                        </span>
+                        <a [href]="story.url" target="_blank" class="source-link" (click)="$event.stopPropagation()">
+                            <span class="source-tag" [attr.data-source]="getStorySource(story.url)">
+                                {{ getStorySource(story.url) }} ↗
+                            </span>
+                        </a>
+                        </div>
                     <span class="story-date">{{ story.fetchedAt | date:'MMM d' }}</span>
                 </div>
 
@@ -43,9 +50,14 @@
                         <div class="score-value">{{ story.scaryScore }}/10</div>
                     </div>
 
-                    <button class="read-btn" [routerLink]="['/story', story.id]">
-                        READ TRACE
-                    </button>
+                    <div class="card-actions">
+                        <button class="read-btn" [routerLink]="['/story', story.id]">
+                            READ TRACE
+                        </button>
+                        <a [href]="story.url" target="_blank" class="original-link" (click)="$event.stopPropagation()">
+                            ORIGINAL POST ↗
+                        </a>
+                        </div>
                 </div>
             </div>
         </article>

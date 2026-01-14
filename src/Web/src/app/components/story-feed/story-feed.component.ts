@@ -40,4 +40,10 @@ export class StoryFeedComponent implements OnInit {
         if (score >= 5) return 'UNSETTLING';
         return 'EERIE';
     }
+
+    getStorySource(url: string): string {
+        if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YOUTUBE';
+        if (url.includes('reddit.com')) return 'REDDIT';
+        return 'VOID';
+    }
 }

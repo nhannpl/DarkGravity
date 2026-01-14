@@ -9,7 +9,7 @@
   <article *ngIf="!loading() && story()" class="story-trace fade-in">
     <header class="reader-header">
       <a routerLink="/" class="back-link">← RETURN TO FEED</a>
-
+      
       <div class="metadata-bar">
         <span class="scary-tag" [attr.data-level]="getScaryLevel(story()!.scaryScore)">
           {{ getScaryLevel(story()!.scaryScore) }} ANOMALY
@@ -21,6 +21,16 @@
       </div>
 
       <h1 class="story-title">{{ story()!.title }}</h1>
+<div class="header-actions">
+  <a [href]="story()!.url" target="_blank" class="source-link">
+    <span class="source-tag" [attr.data-source]="getStorySource(story()!.url)">
+      VIEW ORIGINAL ON {{ getStorySource(story()!.url) }} ↗
+    </span>
+  </a>
+  <button class="action-btn-small glass">
+    <span class="icon">★</span> SAVE TO SHADOWS
+  </button>
+</div>
     </header>
 
     <div class="ai-analysis-box glass">
@@ -28,7 +38,7 @@
         <span class="ai-icon">✧</span>
         AI INSIGHT (SOCRATES LITE)
       </div>
-      <p class="analysis-text">{{ story()!.aiAnalysis }}</p>
+      <div class="analysis-text" [innerHTML]="story()!.aiAnalysis | markdown"></div>
       <div class="score-grid">
         <div class="score-item">
           <span class="label">SCARY SCORE</span>
@@ -40,7 +50,23 @@
       </div>
     </div>
 
-    <section class="story-body">
+    <div *ngIf="videoEmbedUrl()" class="video-embed-container glass fade-in">
+      <div class="video-wrapper">
+        <iframe [src]="videoEmbedUrl()" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+    
+    <div class="transcript-toggle" (click)="toggleTranscript()" [class.open]="isTranscriptOpen()">
+      <div class="content-label">
+        <span class="label-icon">▤</span>
+        {{ getStorySource(story()!.url) === 'YOUTUBE' ? 'DECRYPTED TRANSCRIPT' : 'ARCHIVED STORY LOG' }}
+        <span class="dropdown-arrow">{{ isTranscriptOpen() ? '▼' : '▶' }}</span>
+      </div>
+    </div>
+    
+    <section class="story-body" *ngIf="isTranscriptOpen()">
       <p class="paragraph" *ngFor="let para of story()!.bodyText.split('\n')">
         {{ para }}
       </p>
@@ -48,10 +74,6 @@
 
     <footer class="reader-footer">
       <div class="trace-end">END OF TRACE</div>
-      <div class="actions">
-        <button class="action-btn glass">SAVE TO SHADOWS</button>
-        <a [href]="story()!.url" target="_blank" class="action-btn glass">ORIGINAL SOURCE</a>
-      </div>
     </footer>
   </article>
 

@@ -56,6 +56,10 @@
     margin-bottom: 1rem;
 }
 
+.header-tags {
+    display: flex;
+    gap: 0.5rem;
+}
 .scary-tag {
     font-size: 0.7rem;
     font-weight: 700;
@@ -65,6 +69,66 @@
     background: rgba(255, 255, 255, 0.05);
 }
 
+.card-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.original-link {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+}
+
+.original-link:hover {
+    color: var(--primary-glow);
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+.source-link {
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+}
+
+.source-link:hover {
+    opacity: 0.8;
+}
+
+.source-tag {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.source-tag[data-source="YOUTUBE"] {
+    color: #ff0000;
+    border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.source-tag[data-source="REDDIT"] {
+    color: #ff4500;
+    border: 1px solid rgba(255, 69, 0, 0.2);
+}
+
+.source-tag[data-source="VOID"] {
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
 .scary-tag[data-level="ELDRIITCH"] {
     color: #ff3d00;
     border: 1px solid rgba(255, 61, 0, 0.3);
