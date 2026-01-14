@@ -51,11 +51,35 @@ You requested a smaller, step-by-step approach. We will build this project **ite
 2.  Open `http://localhost:xxxx/swagger`.
 3.  Execute `GET /api/stories` and confirm we see the Reddit stories fetched by the Crawler.
 
-## Phase 5: The Frontend
-**Goal**: Display the stories beautifully.
-1.  Create a basic **Angular** app.
-2.  Fetch data from our `GET /stories` API.
-3.  Display the stories in a list.
+## Phase 5: The "Dark" Frontend (Visualizing the Abyss)
+**Goal**: Create a premium, immersive web experience to consume the horror stories.
+
+### 5.1. The Foundation (Design & Branding)
+1.  **Initialize Angular**: Create the project in `src/Web` using Angular 17/18+.
+2.  **Design System**: Define a "Dark Gravity" theme in `styles.css`.
+    *   **Palette**: Deep Void (#050505), Gravity Purple (#6200ea), and Ethereal Silver.
+    *   **Effects**: Glassmorphism, neon glows, and smooth transitions.
+3.  **Core Layout**: Create a shell with a premium sidebar/header and a main content area.
+
+### 5.2. Infrastructure & Services
+1.  **Story Service**: Create an Angular service to interface with the .NET Web API.
+2.  **DTO Interfaces**: Define TypeScript interfaces reflecting the `Shared` Story model.
+3.  **Environment Config**: Setup API base URLs for local dev.
+
+### 5.3. Components (High-End UI)
+1.  **Story Card**: A glass-styled card showing title, excerpt, and the AI "Scary Score".
+2.  **Scary Score Gauge**: A custom visual indicator (glowing meter) for the AI analysis result.
+3.  **Story Grid**: A responsive layout using CSS Grid/Flexbox with staggered entrance animations.
+4.  **Reader Mode**: A dedicated view for reading full stories with optimized typography.
+
+### 5.4. Features & UX
+1.  **Dynamic Sorting**: Sort stories by date or "Scary Score" (AI-driven).
+2.  **Search/Filter**: Quick search through the abyss of stories.
+3.  **Loading States**: Implement "Ghost" skeletons (shimmering placeholders) during data fetch.
+
+### 5.5. Verify
+1.  Run the .NET Api and Angular Web app simultaneously.
+2.  Ensure stories flow from Reddit -> Crawler -> SQL -> API -> Angular UI.
 
 ## Phase 6: Scaling Up (The "Resume" Features)
 **Goal**: *Now* we add the advanced enterprise features.

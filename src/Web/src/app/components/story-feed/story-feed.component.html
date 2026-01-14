@@ -1,0 +1,53 @@
+<div class="feed-container">
+    <div class="feed-header fade-in">
+        <h2 class="section-title">Fresh Encounters</h2>
+        <p class="section-subtitle">The latest transmissions from the abyss.</p>
+    </div>
+
+    <div *ngIf="loading()" class="skeleton-grid">
+        <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card glass"></div>
+    </div>
+
+    <div *ngIf="!loading() && filteredStories().length === 0" class="empty-state fade-in">
+        <div class="empty-icon">♢</div>
+        <h3>The Abyss is Silent</h3>
+        <p>No transmissions match your search query.</p>
+    </div>
+
+    <div *ngIf="!loading() && filteredStories().length > 0" class="story-grid">
+        <article *ngFor="let story of filteredStories(); let i = index" class="story-card glass fade-in"
+            [style.animation-delay]="i * 0.1 + 's'">
+
+            <div class="card-glow"></div>
+
+            <div class="card-content">
+                <div class="card-header">
+                    <span class="scary-tag" [attr.data-level]="getScaryLevel(story.scaryScore)">
+                        {{ getScaryLevel(story.scaryScore) }}
+                    </span>
+                    <span class="story-date">{{ story.createdAt | date:'MMM d' }}</span>
+                </div>
+
+                <h3 class="story-title">{{ story.title }}</h3>
+
+                <p class="story-excerpt">
+                    {{ story.storyContent | slice:0:150 }}...
+                </p>
+
+                <div class="card-footer">
+                    <div class="score-indicator">
+                        <div class="score-label">Anomaly level</div>
+                        <div class="score-bar-bg">
+                            <div class="score-bar-fill" [style.width.%]="story.scaryScore * 10"></div>
+                        </div>
+                        <div class="score-value">{{ story.scaryScore }}/10</div>
+                    </div>
+
+                    <button class="read-btn">
+                        READ TRACE
+                    </button>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>

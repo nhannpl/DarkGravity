@@ -1,0 +1,43 @@
+<div class="layout-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar glass">
+    <div class="logo-container">
+      <div class="logo-glow"></div>
+      <h1 class="logo-text">DARK GRAVITY</h1>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="/" class="nav-item active">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Abyss Feed</span>
+      </a>
+      <a href="/favorites" class="nav-item">
+        <span class="nav-icon">★</span>
+        <span class="nav-label">Saved Shadows</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="status-indicator">
+        <span class="pulse"></span>
+        System Online
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="top-header glass">
+      <div class="search-bar">
+        <input type="text" placeholder="Search the void..." class="search-input" (input)="onSearch($event)">
+      </div>
+      <div class="user-profile">
+        <div class="user-avatar glass">N</div>
+      </div>
+    </header>
+
+    <section class="content-area">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>
