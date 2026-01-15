@@ -3,8 +3,8 @@
         "Crawler": {
             "commandName": "Project",
             "environmentVariables": {
-                "GEMINI_API_KEY": "REMOVED_SECRET",
-                "OPENAI_API_KEY": ""
+                "GEMINI_API_KEY": "YOUR_KEY_HERE",
+                "OPENAI_API_KEY": "YOUR_KEY_HERE"
             }
         }
     }

@@ -1,8 +1,16 @@
 ﻿using Shared.Data;
 using Shared.Models;
 using Crawler.Services;
+using Microsoft.Extensions.Configuration;
 
 Console.WriteLine("🕷️ Spider Starting (Multi-Source Edition)...");
+
+// 0. Configuration Setup
+var config = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: true)
+    .AddUserSecrets<Program>()
+    .AddEnvironmentVariables()
+    .Build();
 
 // 1. Dependency Injection Setup
 using var db = new AppDbContext();
@@ -11,7 +19,7 @@ client.DefaultRequestHeaders.Add("User-Agent", "MyCrawler/1.0");
 
 var redditService = new RedditService(client);
 var youtubeService = new YouTubeService();
-var analyzer = new StoryAnalyzer(client);
+var analyzer = new StoryAnalyzer(client, config);
 var processor = new StoryProcessor(db, analyzer);
 
 // 2. Execution
