@@ -213,28 +213,32 @@ var assemblies = [
   {
     "name": "Api",
     "classes": [
-      { "name": "Api.Controllers.StoriesController", "rp": "Api_StoriesController.html", "cl": 39, "ucl": 13, "cal": 52, "tl": 87, "cb": 11, "tb": 20, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Api.Controllers.StoriesController", "rp": "Api_StoriesController.html", "cl": 46, "ucl": 6, "cal": 52, "tl": 87, "cb": 12, "tb": 20, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Api.Extensions.ServiceCollectionExtensions", "rp": "Api_ServiceCollectionExtensions.html", "cl": 20, "ucl": 20, "cal": 40, "tl": 58, "cb": 2, "tb": 10, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Api.Models.PagedResult<T>", "rp": "Api_PagedResult_1.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 10, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Api.Models.StoryQueryParameters", "rp": "Api_StoryQueryParameters.html", "cl": 6, "ucl": 0, "cal": 6, "tl": 26, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Microsoft.AspNetCore.OpenApi.Generated", "rp": "Api_Generated.html", "cl": 0, "ucl": 374, "cal": 374, "tl": 592, "cb": 0, "tb": 206, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Program", "rp": "Api_Program.html", "cl": 48, "ucl": 9, "cal": 57, "tl": 89, "cb": 7, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Program", "rp": "Api_Program.html", "cl": 0, "ucl": 20, "cal": 20, "tl": 36, "cb": 0, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "System.Runtime.CompilerServices", "rp": "Api_CompilerServices.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 23, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
     "name": "Crawler",
     "classes": [
-      { "name": "Crawler.Services.RedditService", "rp": "Crawler_RedditService.html", "cl": 31, "ucl": 0, "cal": 31, "tl": 51, "cb": 8, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Crawler.Services.StoryAnalyzer", "rp": "Crawler_StoryAnalyzer.html", "cl": 142, "ucl": 141, "cal": 283, "tl": 346, "cb": 50, "tb": 120, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Crawler.Services.StoryProcessor", "rp": "Crawler_StoryProcessor.html", "cl": 20, "ucl": 6, "cal": 26, "tl": 50, "cb": 5, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Crawler.Services.YouTubeService", "rp": "Crawler_YouTubeService.html", "cl": 0, "ucl": 68, "cal": 68, "tl": 86, "cb": 0, "tb": 24, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Program", "rp": "Crawler_Program.html", "cl": 0, "ucl": 42, "cal": 42, "tl": 63, "cb": 0, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Crawler.CrawlerApp", "rp": "Crawler_CrawlerApp.html", "cl": 39, "ucl": 3, "cal": 42, "tl": 70, "cb": 5, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Crawler.Services.RedditService", "rp": "Crawler_RedditService.html", "cl": 31, "ucl": 0, "cal": 31, "tl": 56, "cb": 8, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Crawler.Services.ServiceCollectionExtensions", "rp": "Crawler_ServiceCollectionExtensions.html", "cl": 14, "ucl": 0, "cal": 14, "tl": 25, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Crawler.Services.StoryAnalyzer", "rp": "Crawler_StoryAnalyzer.html", "cl": 182, "ucl": 38, "cal": 220, "tl": 346, "cb": 44, "tb": 60, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Crawler.Services.StoryProcessor", "rp": "Crawler_StoryProcessor.html", "cl": 20, "ucl": 3, "cal": 23, "tl": 50, "cb": 5, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Crawler.Services.YoutubeClientWrapper", "rp": "Crawler_YoutubeClientWrapper.html", "cl": 4, "ucl": 4, "cal": 8, "tl": 29, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Crawler.Services.YouTubeService", "rp": "Crawler_YouTubeService.html", "cl": 39, "ucl": 14, "cal": 53, "tl": 86, "cb": 5, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Program", "rp": "Crawler_Program.html", "cl": 0, "ucl": 12, "cal": 12, "tl": 28, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
     "name": "Shared",
     "classes": [
-      { "name": "Shared.Data.AppDbContext", "rp": "Shared_AppDbContext.html", "cl": 5, "ucl": 4, "cal": 9, "tl": 22, "cb": 1, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Shared.Migrations.AddScaryScore", "rp": "Shared_AddScaryScore.html", "cl": 70, "ucl": 4, "cal": 74, "tl": 116, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Shared.Migrations.AppDbContextModelSnapshot", "rp": "Shared_AppDbContextModelSnapshot.html", "cl": 49, "ucl": 0, "cal": 49, "tl": 71, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Shared.Data.AppDbContext", "rp": "Shared_AppDbContext.html", "cl": 6, "ucl": 3, "cal": 9, "tl": 22, "cb": 1, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Shared.Migrations.AddScaryScore", "rp": "Shared_AddScaryScore.html", "cl": 0, "ucl": 74, "cal": 74, "tl": 116, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Shared.Migrations.AppDbContextModelSnapshot", "rp": "Shared_AppDbContextModelSnapshot.html", "cl": 0, "ucl": 49, "cal": 49, "tl": 71, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Shared.Models.Story", "rp": "Shared_Story.html", "cl": 10, "ucl": 0, "cal": 10, "tl": 15, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
 ];
@@ -274,18 +278,6 @@ var riskHotspots = [
       { "value": 18, "exceeded": true },
     ]},
   {
-    "assembly": "Crawler", "class": "Crawler.Services.YouTubeService", "reportPath": "Crawler_YouTubeService.html", "methodName": "GetStoriesFromChannelAsync()", "methodShortName": "GetStoriesFromChannelAsync()", "fileIndex": 0, "line": 19,
-    "metrics": [
-      { "value": 156, "exceeded": true },
-      { "value": 12, "exceeded": false },
-    ]},
-  {
-    "assembly": "Crawler", "class": "Crawler.Services.YouTubeService", "reportPath": "Crawler_YouTubeService.html", "methodName": "GetStoriesFromChannelAsync()", "methodShortName": "GetStoriesFromChannelAsync()", "fileIndex": 0, "line": 24,
-    "metrics": [
-      { "value": 156, "exceeded": true },
-      { "value": 12, "exceeded": false },
-    ]},
-  {
     "assembly": "Api", "class": "Microsoft.AspNetCore.OpenApi.Generated", "reportPath": "Api_Generated.html", "methodName": "CreateDocumentationId(System.Reflection.PropertyInfo)", "methodShortName": "CreateDocumentationId(...)", "fileIndex": 0, "line": 100,
     "metrics": [
       { "value": 110, "exceeded": true },
@@ -304,33 +296,9 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
-    "assembly": "Crawler", "class": "Crawler.Services.StoryAnalyzer", "reportPath": "Crawler_StoryAnalyzer.html", "methodName": "AnalyzeHuggingFaceAsync()", "methodShortName": "AnalyzeHuggingFaceAsync()", "fileIndex": 0, "line": 288,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "Crawler", "class": "Crawler.Services.StoryAnalyzer", "reportPath": "Crawler_StoryAnalyzer.html", "methodName": "AnalyzeHuggingFaceAsync()", "methodShortName": "AnalyzeHuggingFaceAsync()", "fileIndex": 0, "line": 283,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
-    "assembly": "Crawler", "class": "Program", "reportPath": "Crawler_Program.html", "methodName": "<Main>$()", "methodShortName": "<Main>$()", "fileIndex": 0, "line": 6,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
     "assembly": "Crawler", "class": "Crawler.Services.StoryAnalyzer", "reportPath": "Crawler_StoryAnalyzer.html", "methodName": "AnalyzeAsync()", "methodShortName": "AnalyzeAsync()", "fileIndex": 0, "line": 82,
     "metrics": [
-      { "value": 29, "exceeded": false },
-      { "value": 24, "exceeded": true },
-    ]},
-  {
-    "assembly": "Crawler", "class": "Crawler.Services.StoryAnalyzer", "reportPath": "Crawler_StoryAnalyzer.html", "methodName": "AnalyzeAsync()", "methodShortName": "AnalyzeAsync()", "fileIndex": 0, "line": 77,
-    "metrics": [
-      { "value": 29, "exceeded": false },
+      { "value": 24, "exceeded": false },
       { "value": 24, "exceeded": true },
     ]},
   {

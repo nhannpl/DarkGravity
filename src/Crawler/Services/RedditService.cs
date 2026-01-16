@@ -4,7 +4,12 @@ using System.Text.Json;
 
 namespace Crawler.Services;
 
-public class RedditService
+public interface IRedditService
+{
+    Task<List<Story>> GetTopStoriesAsync(string url);
+}
+
+public class RedditService : IRedditService
 {
     private readonly HttpClient _http;
 

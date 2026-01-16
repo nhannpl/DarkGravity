@@ -13,11 +13,11 @@ public interface IYouTubeService
 
 public class YouTubeService : IYouTubeService
 {
-    private readonly YoutubeClient _youtube;
+    private readonly IYoutubeClientWrapper _youtube;
 
-    public YouTubeService()
+    public YouTubeService(IYoutubeClientWrapper youtube)
     {
-        _youtube = new YoutubeClient();
+        _youtube = youtube;
     }
 
     public async Task<List<Story>> GetStoriesFromChannelAsync(string query, int limit = 3)
@@ -25,7 +25,7 @@ public class YouTubeService : IYouTubeService
         var stories = new List<Story>();
         try
         {
-            var searchResults = _youtube.Search.GetVideosAsync(query);
+            var searchResults = _youtube.SearchVideosAsync(query);
             
             int count = 0;
             await foreach (var searchResult in searchResults)
@@ -33,19 +33,19 @@ public class YouTubeService : IYouTubeService
                 if (count >= limit) break;
 
                 Console.WriteLine($"   [YT] Fetching details for: {searchResult.Title}");
-                
+
                 // Get full video details
-                var video = await _youtube.Videos.GetAsync(searchResult.Id);
+                var video = await _youtube.GetVideoAsync(searchResult.Id);
                 var bodyText = video.Description;
                 
                 // Try to fetch transcripts
                 try 
                 {
-                    var manifest = await _youtube.Videos.ClosedCaptions.GetManifestAsync(video.Id);
+                    var manifest = await _youtube.GetClosedCaptionManifestAsync(video.Id);
                     var trackInfo = manifest.TryGetByLanguage("en");
                     if (trackInfo != null)
                     {
-                        var track = await _youtube.Videos.ClosedCaptions.GetAsync(trackInfo);
+                        var track = await _youtube.GetClosedCaptionTrackAsync(trackInfo);
                         var sb = new StringBuilder();
                         foreach (var caption in track.Captions)
                         {

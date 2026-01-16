@@ -83,7 +83,7 @@ public class StoriesControllerTests
         // Assert
         var pagedResult = result.Value;
         Assert.Single(pagedResult.Items);
-        Assert.Equal("Slasher Night", pagedResult.Items.First().Tite);
+        Assert.Equal("Slasher Night", pagedResult.Items.First().Title);
     }
 
     [Fact]

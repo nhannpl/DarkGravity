@@ -1,59 +1,73 @@
-using Crawler.Services;
-using Microsoft.EntityFrameworkCore;
 using Moq;
-using Shared.Data;
+using Crawler.Services;
 using Shared.Models;
-using Xunit;
+using Shared.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Crawler.Tests;
 
 public class StoryProcessorTests
 {
-    private readonly DbContextOptions<AppDbContext> _dbOptions;
+    private readonly AppDbContext _db;
+    private readonly Mock<IStoryAnalyzer> _mockAnalyzer;
+    private readonly StoryProcessor _processor;
 
     public StoryProcessorTests()
     {
-        // Use In-Memory database for testing
-        _dbOptions = new DbContextOptionsBuilder<AppDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
+        _db = new AppDbContext(options);
+
+        _mockAnalyzer = new Mock<IStoryAnalyzer>();
+        _processor = new StoryProcessor(_db, _mockAnalyzer.Object);
     }
 
     [Fact]
-    public async Task ProcessAndSaveStoriesAsync_SavesNewStoriesAndSkipsDuplicates()
+    public async Task ProcessAndSaveStoriesAsync_ShouldSaveNewStories()
     {
         // Arrange
-        using var db = new AppDbContext(_dbOptions);
-
-        // Add an existing story
-        var existingExternalId = "ext_123";
-        db.Stories.Add(new Story
+        var stories = new List<Story>
         {
-            ExternalId = existingExternalId,
-            Title = "Old Story",
-            BodyText = "Old Content",
-            Author = "Author"
-        });
-        await db.SaveChangesAsync();
-
-        var mockAnalyzer = new Mock<IStoryAnalyzer>();
-        mockAnalyzer.Setup(a => a.AnalyzeAsync(It.IsAny<Story>()))
-            .ReturnsAsync(("AI Analysis", 75.0));
-
-        var processor = new StoryProcessor(db, mockAnalyzer.Object);
-
-        var storiesToProcess = new List<Story>
-        {
-            new Story { ExternalId = existingExternalId, Title = "Duplicate" }, // Duplicate
-            new Story { ExternalId = "new_456", Title = "New Story", BodyText = "Spooky!", Author = "Writer" } // New
+            new Story { ExternalId = "s1", Title = "Story 1", BodyText = "Text 1" },
+            new Story { ExternalId = "s2", Title = "Story 2", BodyText = "Text 2" }
         };
 
+        _mockAnalyzer.Setup(a => a.AnalyzeAsync(It.IsAny<Story>()))
+            .ReturnsAsync(("AI Analysis", 7.5));
+
         // Act
-        await processor.ProcessAndSaveStoriesAsync(storiesToProcess);
+        await _processor.ProcessAndSaveStoriesAsync(stories);
 
         // Assert
-        Assert.Equal(2, await db.Stories.CountAsync()); // 1 original + 1 new
-        Assert.Contains(db.Stories, s => s.ExternalId == "new_456");
-        Assert.Contains(db.Stories, s => s.ScaryScore == 75);
+        Assert.Equal(2, await _db.Stories.CountAsync());
+        var savedStory = await _db.Stories.FirstAsync(s => s.ExternalId == "s1");
+        Assert.Equal("AI Analysis", savedStory.AiAnalysis);
+        Assert.Equal(7.5, savedStory.ScaryScore);
+    }
+
+    [Fact]
+    public async Task ProcessAndSaveStoriesAsync_ShouldSkipExistingStories()
+    {
+        // Arrange
+        _db.Stories.Add(new Story { ExternalId = "existing", Title = "Old", BodyText = "Old Text" });
+        await _db.SaveChangesAsync();
+
+        var stories = new List<Story>
+        {
+            new Story { ExternalId = "existing", Title = "New", BodyText = "New Text" },
+            new Story { ExternalId = "unique", Title = "Unique", BodyText = "Unique Text" }
+        };
+
+        _mockAnalyzer.Setup(a => a.AnalyzeAsync(It.IsAny<Story>()))
+            .ReturnsAsync(("AI Analysis", 5.0));
+
+        // Act
+        await _processor.ProcessAndSaveStoriesAsync(stories);
+
+        // Assert
+        Assert.Equal(2, await _db.Stories.CountAsync());
+        Assert.True(await _db.Stories.AnyAsync(s => s.ExternalId == "existing" && s.Title == "Old"));
+        Assert.True(await _db.Stories.AnyAsync(s => s.ExternalId == "unique"));
     }
 }

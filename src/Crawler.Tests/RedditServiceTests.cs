@@ -1,74 +1,98 @@
-using Moq;
-using Moq.Contrib.HttpClient;
-using Xunit;
-using Shared.Models;
+using System.Net;
+using System.Text.Json;
 using Crawler.Services;
+using Moq;
+using Moq.Protected;
+using Shared.Models;
+using Xunit;
 
 namespace Crawler.Tests;
 
 public class RedditServiceTests
 {
-    private readonly Mock<HttpMessageHandler> _handler;
-    private readonly HttpClient _client;
-
-    public RedditServiceTests()
-    {
-        _handler = new Mock<HttpMessageHandler>();
-        _client = _handler.CreateClient();
-    }
-
     [Fact]
-    public async Task GetTopStories_ReturnsStories_WhenJsonIsValid()
+    public async Task GetTopStoriesAsync_ReturnsStories_OnSuccess()
     {
         // Arrange
-        var json = """
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        var jsonResponse = @"
         {
-            "data": {
-                "children": [
-                    { 
-                        "data": { 
-                            "id": "1", "title": "Scary Story 1", "author": "User1", 
-                            "permalink": "/r/test/1", "selftext": "Boo", "ups": 100, 
-                            "stickied": false 
-                        } 
+            ""data"": {
+                ""children"": [
+                    {
+                        ""data"": {
+                            ""id"": ""123"",
+                            ""title"": ""Scary Story"",
+                            ""author"": ""GhostWriter"",
+                            ""permalink"": ""/r/nosleep/comments/123/scary_story/"",
+                            ""selftext"": ""Long ago..."",
+                            ""ups"": 100,
+                            ""stickied"": false
+                        }
                     },
-                    { 
-                        "data": { 
-                            "id": "2", "title": "Announcement", "author": "Mod", 
-                            "permalink": "/r/test/2", "selftext": "Rules", "ups": 999, 
-                            "stickied": true 
-                        } 
+                    {
+                        ""data"": {
+                            ""id"": ""456"",
+                            ""title"": ""Stickied Post"",
+                            ""author"": ""Mod"",
+                            ""permalink"": ""/r/nosleep/comments/456/stickied/"",
+                            ""selftext"": ""I am a sticky"",
+                            ""ups"": 10,
+                            ""stickied"": true
+                        }
                     }
                 ]
             }
-        }
-        """;
+        }";
 
-        _handler.SetupRequest(HttpMethod.Get, "https://api.reddit.com/stories")
-                .ReturnsResponse(json, "application/json");
+        mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(jsonResponse),
+            });
 
-        var service = new RedditService(_client);
+        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var redditService = new RedditService(httpClient);
 
         // Act
-        var result = await service.GetTopStoriesAsync("https://api.reddit.com/stories");
+        var result = await redditService.GetTopStoriesAsync("https://reddit.com/r/nosleep.json");
 
         // Assert
-        Assert.Single(result); // Should skip the stickied one
-        Assert.Equal("Scary Story 1", result[0].Title);
-        Assert.Equal("User1", result[0].Author);
+        Assert.Single(result);
+        Assert.Equal("123", result[0].ExternalId);
+        Assert.Equal("Scary Story", result[0].Title);
+        Assert.Equal("GhostWriter", result[0].Author);
+        Assert.Equal("https://reddit.com/r/nosleep/comments/123/scary_story/", result[0].Url);
+        Assert.Equal("Long ago...", result[0].BodyText);
         Assert.Equal(100, result[0].Upvotes);
     }
 
     [Fact]
-    public async Task GetTopStories_ReturnsEmpty_WhenApiFails()
+    public async Task GetTopStoriesAsync_ReturnsEmptyList_OnException()
     {
-        _handler.SetupRequest(HttpMethod.Get, "https://api.reddit.com/fail")
-                .ReturnsResponse(System.Net.HttpStatusCode.InternalServerError);
+        // Arrange
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ThrowsAsync(new HttpRequestException("Network error"));
 
-        var service = new RedditService(_client);
+        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var redditService = new RedditService(httpClient);
 
-        var result = await service.GetTopStoriesAsync("https://api.reddit.com/fail");
+        // Act
+        var result = await redditService.GetTopStoriesAsync("https://reddit.com/r/nosleep.json");
 
+        // Assert
         Assert.Empty(result);
     }
 }
