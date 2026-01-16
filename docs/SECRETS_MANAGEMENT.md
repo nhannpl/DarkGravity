@@ -3,7 +3,9 @@
 This document provides instructions on how to manage sensitive API keys and configuration secrets for the **DarkGravity** project.
 
 ## 🔐 .NET User Secrets
-We use the `.NET User Secrets` manager for local development. This keeps keys out of the source code and prevents accidental commits to Git.
+We use the `.NET User Secrets` manager for local development. This keeps keys out of the source code and prevents accidental commits of sensitive data.
+
+**See [USER_SECRETS_EXAMPLE.md](./USER_SECRETS_EXAMPLE.md) for a quick-start template.**
 
 ### 1. Project: Crawler (`src/Crawler`)
 Used for AI Ingestion and analysis.
@@ -31,9 +33,11 @@ Used for serving the stories to the frontend.
 ## 🌍 Environment Variables & Namespacing (Production)
 For production environments or CI/CD pipelines, use namespaced environment variables. This prevents conflicts when multiple projects are hosted on the same infrastructure.
 
-**Namespaced Key:** `DARKGRAVITY_DB_PASSWORD`
+**Namespaced Keys:** 
+- `DARKGRAVITY_DB_PASSWORD`: SQL Server `sa` password.
+- `AllowedOrigins`: (JSON Array) List of domains permitted to access the API (CORS).
 
-In your CI/CD (e.g., GitHub Actions), add this as a secret and map it in your deployment manifest.
+In your CI/CD (e.g., GitHub Actions), add these as secrets and map them in your deployment manifest.
 
 ## 🛠️ Management Commands
 
