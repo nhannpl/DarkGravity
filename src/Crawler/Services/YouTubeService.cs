@@ -6,7 +6,12 @@ using System.Text;
 
 namespace Crawler.Services;
 
-public class YouTubeService
+public interface IYouTubeService
+{
+    Task<List<Story>> GetStoriesFromChannelAsync(string query, int limit = 3);
+}
+
+public class YouTubeService : IYouTubeService
 {
     private readonly YoutubeClient _youtube;
 

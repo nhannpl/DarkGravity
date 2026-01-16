@@ -224,9 +224,9 @@ var assemblies = [
     "name": "Crawler",
     "classes": [
       { "name": "Crawler.Services.RedditService", "rp": "Crawler_RedditService.html", "cl": 31, "ucl": 0, "cal": 31, "tl": 51, "cb": 8, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Crawler.Services.StoryAnalyzer", "rp": "Crawler_StoryAnalyzer.html", "cl": 141, "ucl": 142, "cal": 283, "tl": 346, "cb": 48, "tb": 120, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Crawler.Services.StoryAnalyzer", "rp": "Crawler_StoryAnalyzer.html", "cl": 142, "ucl": 141, "cal": 283, "tl": 346, "cb": 50, "tb": 120, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Crawler.Services.StoryProcessor", "rp": "Crawler_StoryProcessor.html", "cl": 20, "ucl": 6, "cal": 26, "tl": 50, "cb": 5, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "Crawler.Services.YouTubeService", "rp": "Crawler_YouTubeService.html", "cl": 0, "ucl": 53, "cal": 53, "tl": 81, "cb": 0, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Crawler.Services.YouTubeService", "rp": "Crawler_YouTubeService.html", "cl": 0, "ucl": 68, "cal": 68, "tl": 86, "cb": 0, "tb": 24, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "Program", "rp": "Crawler_Program.html", "cl": 0, "ucl": 42, "cal": 42, "tl": 63, "cb": 0, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
@@ -275,6 +275,12 @@ var riskHotspots = [
     ]},
   {
     "assembly": "Crawler", "class": "Crawler.Services.YouTubeService", "reportPath": "Crawler_YouTubeService.html", "methodName": "GetStoriesFromChannelAsync()", "methodShortName": "GetStoriesFromChannelAsync()", "fileIndex": 0, "line": 19,
+    "metrics": [
+      { "value": 156, "exceeded": true },
+      { "value": 12, "exceeded": false },
+    ]},
+  {
+    "assembly": "Crawler", "class": "Crawler.Services.YouTubeService", "reportPath": "Crawler_YouTubeService.html", "methodName": "GetStoriesFromChannelAsync()", "methodShortName": "GetStoriesFromChannelAsync()", "fileIndex": 0, "line": 24,
     "metrics": [
       { "value": 156, "exceeded": true },
       { "value": 12, "exceeded": false },

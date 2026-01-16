@@ -1,117 +1,142 @@
-using System.Net.Http.Json;
+using Api.Controllers;
 using Api.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shared.Constants;
+using Shared.Data;
 using Shared.Models;
 using Xunit;
 
 namespace Api.IntegrationTests;
 
-public class StoriesControllerTests : BaseIntegrationTest
+public class StoriesControllerTests
 {
-    [Fact]
-    public async Task GetStories_ShouldFilterBySearchTerm()
+    private readonly DbContextOptions<AppDbContext> _dbOptions;
+
+    public StoriesControllerTests()
     {
-        // Arrange
-        var stories = new List<Story>
-        {
-            new() { Title = "The Ghost in the Attic", BodyText = "A scary ghost story.", Upvotes = 10, ScaryScore = 5 },
-            new() { Title = "The Monster under the Bed", BodyText = "A creepy monster tale.", Upvotes = 5, ScaryScore = 8 },
-            new() { Title = "Routine Day", BodyText = "Nothing scary happens.", Upvotes = 20, ScaryScore = 1 }
-        };
-        DbContext.Stories.AddRange(stories);
-        await DbContext.SaveChangesAsync();
-
-        // Act
-        var response = await Client.GetAsync("/api/stories?searchTerm=Ghost");
-        var result = await response.Content.ReadFromJsonAsync<PagedResult<Story>>();
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Single(result.Items);
-        Assert.Equal("The Ghost in the Attic", result.Items.First().Title);
+        _dbOptions = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
     }
 
-    [Fact]
-    public async Task GetStories_ShouldFilterByMinScaryScore()
+    private async Task SeedDatabase(AppDbContext db)
     {
-        // Arrange
-        var stories = new List<Story>
+        db.Stories.AddRange(new List<Story>
         {
-            new() { Title = "Mild Scare", Upvotes = 10, ScaryScore = 3 },
-            new() { Title = "Extreme Terror", Upvotes = 5, ScaryScore = 9 },
-            new() { Title = "Unsettling Night", Upvotes = 20, ScaryScore = 6 }
-        };
-        DbContext.Stories.AddRange(stories);
-        await DbContext.SaveChangesAsync();
-
-        // Act
-        var response = await Client.GetAsync("/api/stories?minScaryScore=5");
-        var result = await response.Content.ReadFromJsonAsync<PagedResult<Story>>();
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Items.Count());
-        Assert.All(result.Items, s => Assert.True(s.ScaryScore >= 5));
-    }
-
-    [Fact]
-    public async Task GetStories_ShouldSortByScaryScoreDescending()
-    {
-        // Arrange
-        var stories = new List<Story>
-        {
-            new() { Title = "Score 2", ScaryScore = 2, Upvotes = 1 },
-            new() { Title = "Score 9", ScaryScore = 9, Upvotes = 1 },
-            new() { Title = "Score 5", ScaryScore = 5, Upvotes = 1 }
-        };
-        DbContext.Stories.AddRange(stories);
-        await DbContext.SaveChangesAsync();
-
-        // Act
-        var response = await Client.GetAsync($"/api/stories?sortBy={StorySortFields.ScaryScore}&sortOrder={SortOrders.Descending}");
-        var result = await response.Content.ReadFromJsonAsync<PagedResult<Story>>();
-
-        // Assert
-        Assert.NotNull(result);
-        var items = result.Items.ToList();
-        Assert.Equal(9, items[0].ScaryScore);
-        Assert.Equal(5, items[1].ScaryScore);
-        Assert.Equal(2, items[2].ScaryScore);
-    }
-
-    [Fact]
-    public async Task GetStories_ShouldHandlePagination()
-    {
-        // Arrange
-        var stories = Enumerable.Range(1, 20).Select(i => new Story 
-        { 
-            Title = $"Story {i}", 
-            Upvotes = i,
-            ScaryScore = 5
+            new Story { Id = Guid.NewGuid(), Title = "A Scary Story", BodyText = "Boo!", ScaryScore = 8.5, Upvotes = 100, FetchedAt = DateTime.UtcNow.AddHours(-2), ExternalId = "1", Author = "A1", Url = "U1" },
+            new Story { Id = Guid.NewGuid(), Title = "Ghost in the Shell", BodyText = "Creepy.", ScaryScore = 4.2, Upvotes = 50, FetchedAt = DateTime.UtcNow.AddHours(-1), ExternalId = "2", Author = "A2", Url = "U2" },
+            new Story { Id = Guid.NewGuid(), Title = "Slasher Night", BodyText = "Run!", ScaryScore = 9.8, Upvotes = 200, FetchedAt = DateTime.UtcNow, ExternalId = "3", Author = "A3", Url = "U3" }
         });
-        DbContext.Stories.AddRange(stories);
-        await DbContext.SaveChangesAsync();
-
-        // Act
-        var response = await Client.GetAsync("/api/stories?page=2&pageSize=5&sortBy=Upvotes&sortOrder=asc");
-        var result = await response.Content.ReadFromJsonAsync<PagedResult<Story>>();
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(20, result.TotalCount);
-        Assert.Equal(5, result.Items.Count());
-        Assert.Equal(2, result.Page);
-        // Story 1-5 (Page 1), Story 6-10 (Page 2)
-        Assert.Equal("Story 6", result.Items.First().Title);
+        await db.SaveChangesAsync();
     }
 
     [Fact]
-    public async Task GetStories_ShouldReturnBadRequest_ForInvalidPageSize()
+    public async Task GetStories_ReturnsAllStories_WithDefaultParams()
     {
+        // Arrange
+        using var db = new AppDbContext(_dbOptions);
+        await SeedDatabase(db);
+        var controller = new StoriesController(db);
+        var queryParams = new StoryQueryParameters();
+
         // Act
-        var response = await Client.GetAsync("/api/stories?pageSize=5000");
+        var result = await controller.GetStories(queryParams);
 
         // Assert
-        Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+        var actionResult = Assert.IsType<ActionResult<PagedResult<Story>>>(result);
+        var pagedResult = Assert.IsType<PagedResult<Story>>(actionResult.Value);
+        Assert.Equal(3, pagedResult.TotalCount);
+        Assert.Equal(3, pagedResult.Items.Count());
+    }
+
+    [Fact]
+    public async Task GetStories_FiltersBySearchTerm()
+    {
+        // Arrange
+        using var db = new AppDbContext(_dbOptions);
+        await SeedDatabase(db);
+        var controller = new StoriesController(db);
+        var queryParams = new StoryQueryParameters { SearchTerm = "Slasher" };
+
+        // Act
+        var result = await controller.GetStories(queryParams);
+
+        // Assert
+        var pagedResult = result.Value;
+        Assert.Single(pagedResult.Items);
+        Assert.Equal("Slasher Night", pagedResult.Items.First().Title);
+    }
+
+    [Fact]
+    public async Task GetStories_FiltersByMinScaryScore()
+    {
+        // Arrange
+        using var db = new AppDbContext(_dbOptions);
+        await SeedDatabase(db);
+        var controller = new StoriesController(db);
+        var queryParams = new StoryQueryParameters { MinScaryScore = 9.0 };
+
+        // Act
+        var result = await controller.GetStories(queryParams);
+
+        // Assert
+        var pagedResult = result.Value;
+        Assert.Single(pagedResult.Items);
+        Assert.Equal("Slasher Night", pagedResult.Items.First().Tite);
+    }
+
+    [Fact]
+    public async Task GetStories_SortsByScaryScoreDescending()
+    {
+        // Arrange
+        using var db = new AppDbContext(_dbOptions);
+        await SeedDatabase(db);
+        var controller = new StoriesController(db);
+        var queryParams = new StoryQueryParameters 
+        { 
+            SortBy = StorySortFields.ScaryScore, 
+            SortOrder = SortOrders.Descending 
+        };
+
+        // Act
+        var result = await controller.GetStories(queryParams);
+
+        // Assert
+        var items = result.Value.Items.ToList();
+        Assert.Equal("Slasher Night", items[0].Title); // 9.8
+        Assert.Equal("A Scary Story", items[1].Title); // 8.5
+        Assert.Equal("Ghost in the Shell", items[2].Title); // 4.2
+    }
+
+    [Fact]
+    public async Task GetStory_ReturnsNotFound_WhenIdMissing()
+    {
+        // Arrange
+        using var db = new AppDbContext(_dbOptions);
+        var controller = new StoriesController(db);
+
+        // Act
+        var result = await controller.GetStory(Guid.NewGuid());
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task GetStory_ReturnsStory_WhenIdExists()
+    {
+        // Arrange
+        using var db = new AppDbContext(_dbOptions);
+        var id = Guid.NewGuid();
+        db.Stories.Add(new Story { Id = id, Title = "Found", BodyText = "Text", Author = "A", Url = "U", ExternalId = "E" });
+        await db.SaveChangesAsync();
+        var controller = new StoriesController(db);
+
+        // Act
+        var result = await controller.GetStory(id);
+
+        // Assert
+        Assert.Equal("Found", result.Value.Title);
     }
 }

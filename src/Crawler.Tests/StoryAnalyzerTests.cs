@@ -75,4 +75,28 @@ public class StoryAnalyzerTests : IDisposable
         // Assert
         Assert.Contains("MOCK ANALYSIS", result.Analysis);
     }
+
+    [Theory]
+    [InlineData("This is scary. Score: 8.5/10", 8.5)]
+    [InlineData("Spooky! score: 7", 7.0)]
+    [InlineData("Terrifying! 9.2/10", 9.2)]
+    [InlineData("No score here.", null)]
+    public async Task AnalyzeAsync_CorrectlyParsesVariousScoreFormats(string aiResponse, double? expectedScore)
+    {
+        // Arrange
+        _config.Setup(c => c["GEMINI_API_KEY"]).Returns("fake_key");
+        var analyzer = new StoryAnalyzer(_client, _config.Object);
+        var story = new Story { Title = "T", BodyText = "B" };
+
+        var geminiResponse = $@"{{ ""candidates"": [ {{ ""content"": {{ ""parts"": [ {{ ""text"": ""{aiResponse}"" }} ] }} }} ] }}";
+
+        _handler.SetupRequest(HttpMethod.Post, r => r.RequestUri!.ToString().Contains("gemini"))
+                .ReturnsResponse(geminiResponse, "application/json");
+
+        // Act
+        var result = await analyzer.AnalyzeAsync(story);
+
+        // Assert
+        Assert.Equal(expectedScore, result.Score);
+    }
 }

@@ -335,8 +335,8 @@ public class StoryAnalyzer : IStoryAnalyzer
 
     private double? ParseScore(string text)
     {
-        // Look for "Score: 7.5/10" or "Score: 7.5" or "7.5/10"
-        var match = Regex.Match(text, @"Score[:\s]*(\d+(\.\d+)?)", RegexOptions.IgnoreCase);
+        // Look for "Score: 7.5/10" or "Score: 7.5" or "7.5/10" or just "9.2"
+        var match = Regex.Match(text, @"(?:Score[:\s]*)?(\d+(\.\d+)?)", RegexOptions.IgnoreCase);
         if (match.Success && double.TryParse(match.Groups[1].Value, out double score))
         {
             return score;
