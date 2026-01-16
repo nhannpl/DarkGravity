@@ -8,7 +8,12 @@ using System.Text.RegularExpressions;
 
 namespace Crawler.Services;
 
-public class StoryAnalyzer
+public interface IStoryAnalyzer
+{
+    Task<(string Analysis, double? Score)> AnalyzeAsync(Story story);
+}
+
+public class StoryAnalyzer : IStoryAnalyzer
 {
     private readonly HttpClient _http;
     private readonly Kernel? _openaiKernel;

@@ -12,9 +12,9 @@ public interface IStoryProcessor
 public class StoryProcessor : IStoryProcessor
 {
     private readonly AppDbContext _db;
-    private readonly StoryAnalyzer _analyzer;
+    private readonly IStoryAnalyzer _analyzer;
 
-    public StoryProcessor(AppDbContext db, StoryAnalyzer analyzer)
+    public StoryProcessor(AppDbContext db, IStoryAnalyzer analyzer)
     {
         _db = db;
         _analyzer = analyzer;
@@ -22,7 +22,10 @@ public class StoryProcessor : IStoryProcessor
 
     public async Task ProcessAndSaveStoriesAsync(List<Story> stories)
     {
-        await _db.Database.MigrateAsync();
+        if (_db.Database.IsRelational())
+        {
+            await _db.Database.MigrateAsync();
+        }
 
         foreach (var story in stories)
         {
