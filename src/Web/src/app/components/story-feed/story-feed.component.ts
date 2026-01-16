@@ -1,38 +1,54 @@
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { StoryService } from '../../services/story.service';
 import { SearchService } from '../../services/search.service';
 import { Story } from '../../models/story.model';
+import { StorySortFields, SortOrders } from '../../constants/story.constants';
 
 @Component({
     selector: 'app-story-feed',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule, RouterLink, FormsModule],
     templateUrl: './story-feed.component.html',
     styleUrl: './story-feed.component.css'
 })
 export class StoryFeedComponent implements OnInit {
     private storyService = inject(StoryService);
-    private searchService = inject(SearchService);
+    public searchService = inject(SearchService);
 
+    stories = this.storyService.stories;
     loading = this.storyService.loading;
 
-    // Filtered stories using computed signals
-    filteredStories = computed(() => {
-        const stories = this.storyService.stories();
-        const query = this.searchService.query().toLowerCase();
-
-        if (!query) return stories;
-
-        return stories.filter(s =>
-            s.title.toLowerCase().includes(query) ||
-            s.bodyText.toLowerCase().includes(query)
-        );
-    });
+    constructor() {
+        // Automatically fetch stories when search/filter/sort parameters change
+        effect(() => {
+            const params = {
+                searchTerm: this.searchService.searchTerm(),
+                sortBy: this.searchService.sortBy(),
+                sortOrder: this.searchService.sortOrder(),
+                minScaryScore: this.searchService.minScaryScore(),
+                page: 1, // Reset to page 1 on filter change
+                pageSize: 50
+            };
+            this.storyService.getStories(params).subscribe();
+        });
+    }
 
     ngOnInit(): void {
-        this.storyService.getStories().subscribe();
+        // Initial fetch is handled by effect
+    }
+
+    onSortChange(event: Event) {
+        const value = (event.target as HTMLSelectElement).value;
+        const [field, order] = value.split(':');
+        this.searchService.setSort(field, order as 'asc' | 'desc');
+    }
+
+    onScaryScoreChange(event: Event) {
+        const value = (event.target as HTMLInputElement).value;
+        this.searchService.setMinScaryScore(Number(value));
     }
 
     getScaryLevel(score: number): string {

@@ -4,18 +4,48 @@
         <p class="section-subtitle">The latest transmissions from the abyss.</p>
     </div>
 
+    <!-- Filter Bar -->
+    <div class="filter-bar glass fade-in">
+        <div class="filter-group">
+            <label for="sort-select">Sort By</label>
+            <div class="select-wrapper">
+                <select id="sort-select" (change)="onSortChange($event)" class="filter-select">
+                    <option value="Upvotes:desc">Most Viral</option>
+                    <option value="ScaryScore:desc">Scariest</option>
+                    <option value="FetchedAt:desc">Newest</option>
+                    <option value="Title:asc">A-Z</option>
+                </select>
+                <span class="select-arrow">▾</span>
+            </div>
+        </div>
+    
+        <div class="filter-group">
+            <div class="filter-label-row">
+                <label for="scary-range">Scary Score</label>
+                <span class="range-value">{{ searchService.minScaryScore() }}+</span>
+            </div>
+            <input type="range" id="scary-range" min="0" max="10" step="1" [value]="searchService.minScaryScore()"
+                (input)="onScaryScoreChange($event)" class="filter-range">
+        </div>
+    
+        <div class="filter-stats">
+            <span class="stat-count">{{ stories().length }}</span>
+            <span class="stat-label">Results</span>
+        </div>
+    </div>
+
     <div *ngIf="loading()" class="skeleton-grid">
         <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card glass"></div>
     </div>
 
-    <div *ngIf="!loading() && filteredStories().length === 0" class="empty-state fade-in">
+    <div *ngIf="!loading() && stories().length === 0" class="empty-state fade-in">
         <div class="empty-icon">♢</div>
         <h3>The Abyss is Silent</h3>
-        <p>No transmissions match your search query.</p>
+        <p>No transmissions match your current filters.</p>
     </div>
 
-    <div *ngIf="!loading() && filteredStories().length > 0" class="story-grid">
-        <article *ngFor="let story of filteredStories(); let i = index" class="story-card glass fade-in"
+    <div *ngIf="!loading() && stories().length > 0" class="story-grid">
+        <article *ngFor="let story of stories(); let i = index" class="story-card glass fade-in"
             [style.animation-delay]="i * 0.1 + 's'" [routerLink]="['/story', story.id]">
 
             <div class="card-glow"></div>

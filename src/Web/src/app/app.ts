@@ -25,6 +25,6 @@ export class App {
 
   onSearch(event: Event) {
     const query = (event.target as HTMLInputElement).value;
-    this.searchService.setQuery(query);
+    this.searchService.setSearchTerm(query);
   }
 }

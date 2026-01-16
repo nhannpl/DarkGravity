@@ -1,8 +1,9 @@
-using Crawler.Models;
+using Shared.Models;
 using Crawler.Services;
 using Moq;
 using Moq.Contrib.HttpClient;
 using Xunit;
+using Microsoft.Extensions.Configuration;
 
 namespace Crawler.Tests;
 
@@ -10,11 +11,13 @@ public class StoryAnalyzerTests : IDisposable
 {
     private readonly Mock<HttpMessageHandler> _handler;
     private readonly HttpClient _client;
+    private readonly Mock<IConfiguration> _config;
 
     public StoryAnalyzerTests()
     {
         _handler = new Mock<HttpMessageHandler>();
         _client = _handler.CreateClient();
+        _config = new Mock<IConfiguration>();
     }
 
     public void Dispose()
@@ -28,7 +31,9 @@ public class StoryAnalyzerTests : IDisposable
     {
         // Arrange
         Environment.SetEnvironmentVariable("GEMINI_API_KEY", "fake_key");
-        var analyzer = new StoryAnalyzer(_client);
+        _config.Setup(c => c["GEMINI_API_KEY"]).Returns("fake_key");
+
+        var analyzer = new StoryAnalyzer(_client, _config.Object);
         var story = new Story { Title = "Test Title", BodyText = "This is a scary body text." };
 
         // Mock Gemini JSON Response
@@ -53,7 +58,7 @@ public class StoryAnalyzerTests : IDisposable
         var result = await analyzer.AnalyzeAsync(story);
 
         // Assert
-        Assert.Equal("Ghost Story. Score: 8/10", result);
+        Assert.Equal("Ghost Story. Score: 8/10", result.Analysis);
     }
 
     [Fact]
@@ -62,14 +67,15 @@ public class StoryAnalyzerTests : IDisposable
         // Arrange
         Environment.SetEnvironmentVariable("GEMINI_API_KEY", null);
         Environment.SetEnvironmentVariable("OPENAI_API_KEY", null);
-        
-        var analyzer = new StoryAnalyzer(_client);
+        _config.Setup(c => c["GEMINI_API_KEY"]).Returns((string)null);
+
+        var analyzer = new StoryAnalyzer(_client, _config.Object);
         var story = new Story { Title = "Test", BodyText = "Body" };
 
         // Act
         var result = await analyzer.AnalyzeAsync(story);
 
         // Assert
-        Assert.Contains("MOCK ANALYSIS", result);
+        Assert.Contains("MOCK ANALYSIS", result.Analysis);
     }
 }

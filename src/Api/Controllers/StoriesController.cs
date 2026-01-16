@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.Data;
 using Shared.Models;
+using Shared.Constants;
+using Api.Models;
 
 namespace Api.Controllers;
 
@@ -18,12 +20,55 @@ public class StoriesController : ControllerBase
 
     // GET: api/stories
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Story>>> GetStories()
+    public async Task<ActionResult<PagedResult<Story>>> GetStories([FromQuery] StoryQueryParameters @params)
     {
-        return await _context.Stories
-            .OrderByDescending(s => s.Upvotes)
-            .Take(50) // Limit to top 50 for now
+        var query = _context.Stories.AsQueryable();
+
+        // Filtering
+        if (!string.IsNullOrWhiteSpace(@params.SearchTerm))
+        {
+            query = query.Where(s => s.Title.Contains(@params.SearchTerm) || s.BodyText.Contains(@params.SearchTerm));
+        }
+
+        if (@params.MinScaryScore.HasValue)
+        {
+            query = query.Where(s => s.ScaryScore >= @params.MinScaryScore.Value);
+        }
+
+        // Sorting
+        query = @params.SortBy switch
+        {
+            StorySortFields.ScaryScore => @params.SortOrder == SortOrders.Ascending
+                ? query.OrderBy(s => s.ScaryScore)
+                : query.OrderByDescending(s => s.ScaryScore),
+
+            StorySortFields.FetchedAt => @params.SortOrder == SortOrders.Ascending
+                ? query.OrderBy(s => s.FetchedAt)
+                : query.OrderByDescending(s => s.FetchedAt),
+
+            StorySortFields.Title => @params.SortOrder == SortOrders.Ascending
+                ? query.OrderBy(s => s.Title)
+                : query.OrderByDescending(s => s.Title),
+
+            _ => @params.SortOrder == SortOrders.Ascending
+                ? query.OrderBy(s => s.Upvotes)
+                : query.OrderByDescending(s => s.Upvotes)
+        };
+
+        // Pagination
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((@params.Page - 1) * @params.PageSize)
+            .Take(@params.PageSize)
             .ToListAsync();
+
+        return new PagedResult<Story>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = @params.Page,
+            PageSize = @params.PageSize
+        };
     }
 
     // GET: api/stories/5
