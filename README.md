@@ -53,7 +53,7 @@ Ensure you have the required AI API keys and database credentials set up using .
 dotnet user-secrets set "GEMINI_API_KEY" "your_key" --project src/Crawler
 
 # Set Database Password (Namespaced)
-dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'REMOVED_PASSWORD' --project src/Api
+dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Api
 
 # View all configured secrets
 dotnet user-secrets list --project src/Crawler

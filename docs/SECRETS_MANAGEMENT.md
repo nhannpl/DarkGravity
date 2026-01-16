@@ -61,12 +61,12 @@ Replace `your_value` with your actual secret. Use **single quotes** if the value
 
 **For AI Keys:**
 ```bash
-dotnet user-secrets set "OPENAI_API_KEY" "sk-..." --project src/Crawler
+dotnet user-secrets set "OPENAI_API_KEY" "your_openai_key" --project src/Crawler
 ```
 
 **For Database Password:**
 ```bash
-dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'REMOVED_PASSWORD' --project src/Api
+dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Api
 ```
 
 # Multi-provider shortcuts
