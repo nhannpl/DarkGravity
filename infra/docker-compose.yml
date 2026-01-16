@@ -11,7 +11,7 @@ services:
       - "1433:1433"
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "REMOVED_PASSWORD"
+      SA_PASSWORD: "${DARKGRAVITY_DB_PASSWORD}"
       MSSQL_PID: "Developer"
     volumes:
        - sql_data_persist:/var/opt/mssql

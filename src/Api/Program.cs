@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Shared.Data;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,9 +9,21 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Database Context
+// Database Context with dynamic secret injection
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var dbPassword = builder.Configuration["DARKGRAVITY_DB_PASSWORD"];
+
+if (!string.IsNullOrEmpty(dbPassword))
+{
+    var connectionBuilder = new SqlConnectionStringBuilder(connectionString)
+    {
+        Password = dbPassword
+    };
+    connectionString = connectionBuilder.ConnectionString;
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
 
 // CORS (Allow All for Development)
 builder.Services.AddCors(options =>

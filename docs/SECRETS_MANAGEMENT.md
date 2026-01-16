@@ -5,8 +5,8 @@ This document provides instructions on how to manage sensitive API keys and conf
 ## 🔐 .NET User Secrets
 We use the `.NET User Secrets` manager for local development. This keeps keys out of the source code and prevents accidental commits to Git.
 
-### Required Keys
-The following keys are utilized by the `StoryAnalyzer` service ([StoryAnalyzer.cs](../src/Crawler/Services/StoryAnalyzer.cs)):
+### 1. Project: Crawler (`src/Crawler`)
+Used for AI Ingestion and analysis.
 
 | Key | Service | Purpose |
 | :--- | :--- | :--- |
@@ -19,23 +19,51 @@ The following keys are utilized by the `StoryAnalyzer` service ([StoryAnalyzer.c
 | `CLOUDFLARE_API_TOKEN` | Cloudflare Workers AI | Serverless AI |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare | Account context |
 
+### 2. Project: API (`src/Api`)
+Used for serving the stories to the frontend.
+
+| Key | Purpose | Default (Local) |
+| :--- | :--- | :--- |
+| `DARKGRAVITY_DB_PASSWORD` | SQL Server `sa` password | *Mandatory (via .env)* |
+
 ---
+
+## 🌍 Environment Variables & Namespacing (Production)
+For production environments or CI/CD pipelines, use namespaced environment variables. This prevents conflicts when multiple projects are hosted on the same infrastructure.
+
+**Namespaced Key:** `DARKGRAVITY_DB_PASSWORD`
+
+In your CI/CD (e.g., GitHub Actions), add this as a secret and map it in your deployment manifest.
 
 ## 🛠️ Management Commands
 
 Run these commands from the project root.
 
 ### 1. View Current Secrets
-To see which keys are currently configured (values will be shown):
+To see all configured keys for both projects:
+
+**Crawler (AI Keys):**
 ```bash
 dotnet user-secrets list --project src/Crawler
 ```
 
-### 2. Set or Update a Secret
-Replace `your_key_here` with your actual API key:
+**API (Infrastructure Keys):**
 ```bash
-# Example for OpenAI
-dotnet user-secrets set "OPENAI_API_KEY" "your_key_here" --project src/Crawler
+dotnet user-secrets list --project src/Api
+```
+
+### 2. Set or Update a Secret
+Replace `your_value` with your actual secret. Use **single quotes** if the value contains special characters like `!`.
+
+**For AI Keys:**
+```bash
+dotnet user-secrets set "OPENAI_API_KEY" "sk-..." --project src/Crawler
+```
+
+**For Database Password:**
+```bash
+dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'REMOVED_PASSWORD' --project src/Api
+```
 
 # Multi-provider shortcuts
 dotnet user-secrets set "GEMINI_API_KEY" "..." --project src/Crawler

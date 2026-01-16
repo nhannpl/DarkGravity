@@ -104,4 +104,14 @@ public class StoriesControllerTests : BaseIntegrationTest
         // Story 1-5 (Page 1), Story 6-10 (Page 2)
         Assert.Equal("Story 6", result.Items.First().Title);
     }
+
+    [Fact]
+    public async Task GetStories_ShouldReturnBadRequest_ForInvalidPageSize()
+    {
+        // Act
+        var response = await Client.GetAsync("/api/stories?pageSize=5000");
+
+        // Assert
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
 }
