@@ -30,7 +30,6 @@ public class StoryAnalyzerTests : IDisposable
     public async Task AnalyzeAsync_UsesGemini_WhenKeyIsPresent()
     {
         // Arrange
-        Environment.SetEnvironmentVariable("GEMINI_API_KEY", "fake_key");
         _config.Setup(c => c["GEMINI_API_KEY"]).Returns("fake_key");
 
         var analyzer = new StoryAnalyzer(_client, _config.Object);
@@ -51,7 +50,7 @@ public class StoryAnalyzerTests : IDisposable
         }
         """;
 
-        _handler.SetupRequest(HttpMethod.Post, r => r.RequestUri.ToString().Contains("gemini")) 
+        _handler.SetupRequest(HttpMethod.Post, r => r.RequestUri!.ToString().Contains("gemini"))
                 .ReturnsResponse(geminiResponse, "application/json");
 
         // Act
@@ -65,9 +64,7 @@ public class StoryAnalyzerTests : IDisposable
     public async Task AnalyzeAsync_FallsBack_WhenNoKeysPresent()
     {
         // Arrange
-        Environment.SetEnvironmentVariable("GEMINI_API_KEY", null);
-        Environment.SetEnvironmentVariable("OPENAI_API_KEY", null);
-        _config.Setup(c => c["GEMINI_API_KEY"]).Returns((string)null);
+        _config.Setup(c => c["GEMINI_API_KEY"]).Returns((string?)null);
 
         var analyzer = new StoryAnalyzer(_client, _config.Object);
         var story = new Story { Title = "Test", BodyText = "Body" };
