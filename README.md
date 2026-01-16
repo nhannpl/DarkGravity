@@ -74,6 +74,39 @@ dotnet user-secrets list --project src/Api
     cd src/Web && npm install && npm start
     ```
 
+## 🧪 Testing & Code Coverage
+
+### 🔧 Prerequisites
+To generate merged HTML reports for the backend, install the `ReportGenerator` tool:
+```bash
+dotnet tool install -g dotnet-reportgenerator-globaltool
+```
+
+### 🖥️ Backend (.NET)
+Run unit and integration tests and collect coverage:
+```bash
+# Run tests and collect data
+dotnet test --collect:"XPlat Code Coverage"
+
+# Generate human-readable HTML report
+reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coveragereport" -reporttypes:Html
+
+# View report (MacOS)
+open coveragereport/index.html
+```
+
+### 🌐 Frontend (Angular)
+Run component/service tests and generate coverage:
+```bash
+cd src/Web
+
+# Run tests once with coverage
+npm test -- --coverage --watch=false
+
+# View report (MacOS)
+open coverage/index.html
+```
+
 ## 📖 Documentation
 - [Implementation Plan](implementation_plan.md) - The roadmap of the project.
 - [Secrets Management Guide](docs/SECRETS_MANAGEMENT.md) - How to configure API keys.
