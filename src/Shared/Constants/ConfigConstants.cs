@@ -27,7 +27,9 @@ public static class ConfigConstants
     public const string ProviderDeepSeek = "DeepSeek";
     public const string ProviderOpenRouter = "OpenRouter";
     public const string ProviderCloudflare = "Cloudflare";
+    public const string ProviderMistral = "Mistral";
     public const string ProviderHuggingFace = "HuggingFace";
+
     public const string ProviderOpenAI = "OpenAI";
 
     // Error detection keywords

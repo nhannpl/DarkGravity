@@ -95,6 +95,11 @@ public class StoryProcessor : IStoryProcessor
     {
         if (string.IsNullOrWhiteSpace(analysis)) return true;
 
+        // Treat Mock Analysis as 'invalid' for the purpose of Repair, 
+        // essentially allowing us to 'upgrade' to real AI if it becomes available.
+        if (analysis.StartsWith(Shared.Constants.ConfigConstants.MockAnalysisPrefix, System.StringComparison.OrdinalIgnoreCase))
+            return true;
+
         // Check against centralized error keywords
         return Shared.Constants.ConfigConstants.ErrorKeywords.Any(k =>
             analysis.Contains(k, System.StringComparison.OrdinalIgnoreCase));

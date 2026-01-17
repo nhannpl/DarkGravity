@@ -93,21 +93,26 @@ public class StoryAnalyzer : IStoryAnalyzer
         if (!string.IsNullOrEmpty(_deepseekKey))
             providers.Add((ConfigConstants.ProviderDeepSeek, async (s) => await AnalyzeHttpAsync(s, ConfigConstants.ProviderDeepSeek, "https://api.deepseek.com/v1/chat/completions", _deepseekKey, "deepseek-chat")));
 
-        // 3. Cloudflare
+        // 3. Mistral (Solid fallback with high quality)
+        if (!string.IsNullOrEmpty(_mistralKey))
+            providers.Add((ConfigConstants.ProviderMistral, async (s) => await AnalyzeHttpAsync(s, ConfigConstants.ProviderMistral, "https://api.mistral.ai/v1/chat/completions", _mistralKey, "mistral-small-latest")));
+
+        // 4. Cloudflare
         if (!string.IsNullOrEmpty(_cloudflareToken) && !string.IsNullOrEmpty(_cloudflareAccountId))
             providers.Add((ConfigConstants.ProviderCloudflare, async (s) => await AnalyzeCloudflareAsync(s)));
 
-        // 4. Hugging Face
+        // 5. Hugging Face
         if (!string.IsNullOrEmpty(_huggingFaceKey))
             providers.Add((ConfigConstants.ProviderHuggingFace, async (s) => await AnalyzeHuggingFaceAsync(s)));
 
-        // 5. OpenRouter
+        // 6. OpenRouter
         if (!string.IsNullOrEmpty(_openrouterKey))
             providers.Add((ConfigConstants.ProviderOpenRouter, async (s) => await AnalyzeHttpAsync(s, ConfigConstants.ProviderOpenRouter, "https://openrouter.ai/api/v1/chat/completions", _openrouterKey, "meta-llama/llama-3.1-8b-instruct:free")));
 
-        // 6. OpenAI
+        // 7. OpenAI
         if (_openaiKernel != null)
             providers.Add((ConfigConstants.ProviderOpenAI, async (s) => await AnalyzeWithOpenAIAsync(s)));
+
 
         // Failover Loop
         string? successfulAnalysis = null;
