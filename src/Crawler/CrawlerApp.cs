@@ -31,7 +31,11 @@ public class CrawlerApp : ICrawlerApp
     {
         try
         {
+            // Maintenance: Fix any corrupted data from previous failed AI runs
+            await _processor.RepairDatabaseAsync();
+
             var subreddits = new[] { "nosleep", "shortscarystories", "libraryofshadows", "scarystories" };
+
             var ytQueries = new[] { "MrBallen horror stories", "Lazy Masquerade horror stories", "The Dark Somnium", "Lighthouse Horror" };
 
             // Fetch from Reddit

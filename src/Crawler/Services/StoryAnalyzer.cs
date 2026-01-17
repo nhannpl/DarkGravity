@@ -1,5 +1,7 @@
 using Shared.Models;
+using Shared.Constants;
 using Microsoft.SemanticKernel;
+
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
@@ -28,7 +30,7 @@ public class StoryAnalyzer : IStoryAnalyzer
     public StoryAnalyzer(HttpClient http, IConfiguration config)
     {
         _http = http;
-        
+
         // Setup Keys from Configuration
         _geminiKey = config["GEMINI_API_KEY"];
         _deepseekKey = config["DEEPSEEK_API_KEY"];
@@ -85,31 +87,32 @@ public class StoryAnalyzer : IStoryAnalyzer
 
         // 1. Gemini
         if (!string.IsNullOrEmpty(_geminiKey))
-            providers.Add(("Gemini", async (s) => await AnalyzeWithGeminiAsync(s)));
+            providers.Add((ConfigConstants.ProviderGemini, async (s) => await AnalyzeWithGeminiAsync(s)));
 
-        // 2. DeepSeek (Great free tier/low cost)
+        // 2. DeepSeek
         if (!string.IsNullOrEmpty(_deepseekKey))
-            providers.Add(("DeepSeek", async (s) => await AnalyzeHttpAsync(s, "DeepSeek", "https://api.deepseek.com/v1/chat/completions", _deepseekKey, "deepseek-chat")));
+            providers.Add((ConfigConstants.ProviderDeepSeek, async (s) => await AnalyzeHttpAsync(s, ConfigConstants.ProviderDeepSeek, "https://api.deepseek.com/v1/chat/completions", _deepseekKey, "deepseek-chat")));
 
-        // 3. Cloudflare Workers AI (Generous free tier)
+        // 3. Cloudflare
         if (!string.IsNullOrEmpty(_cloudflareToken) && !string.IsNullOrEmpty(_cloudflareAccountId))
-            providers.Add(("Cloudflare", async (s) => await AnalyzeCloudflareAsync(s)));
+            providers.Add((ConfigConstants.ProviderCloudflare, async (s) => await AnalyzeCloudflareAsync(s)));
 
-        // 4. Hugging Face (Huge model gallery)
+        // 4. Hugging Face
         if (!string.IsNullOrEmpty(_huggingFaceKey))
-            providers.Add(("HuggingFace", async (s) => await AnalyzeHuggingFaceAsync(s)));
+            providers.Add((ConfigConstants.ProviderHuggingFace, async (s) => await AnalyzeHuggingFaceAsync(s)));
 
-        // 5. OpenRouter (Access to various free models like Llama 3)
+        // 5. OpenRouter
         if (!string.IsNullOrEmpty(_openrouterKey))
-            providers.Add(("OpenRouter", async (s) => await AnalyzeHttpAsync(s, "OpenRouter", "https://openrouter.ai/api/v1/chat/completions", _openrouterKey, "meta-llama/llama-3.1-8b-instruct:free")));
+            providers.Add((ConfigConstants.ProviderOpenRouter, async (s) => await AnalyzeHttpAsync(s, ConfigConstants.ProviderOpenRouter, "https://openrouter.ai/api/v1/chat/completions", _openrouterKey, "meta-llama/llama-3.1-8b-instruct:free")));
 
         // 6. OpenAI
         if (_openaiKernel != null)
-            providers.Add(("OpenAI", async (s) => await AnalyzeWithOpenAIAsync(s)));
+            providers.Add((ConfigConstants.ProviderOpenAI, async (s) => await AnalyzeWithOpenAIAsync(s)));
 
-        // Let's iterate through providers until one works
-        string finalAnalysis = "No analysis available.";
-        
+        // Failover Loop
+        string? successfulAnalysis = null;
+        string? lastError = null;
+
         foreach (var provider in providers)
         {
             Console.WriteLine($"🤖 Attempting analysis with: {provider.Name}...");
@@ -117,33 +120,33 @@ public class StoryAnalyzer : IStoryAnalyzer
 
             if (result.IsSuccess)
             {
-                finalAnalysis = result.Analysis;
+                successfulAnalysis = result.Analysis;
                 Console.WriteLine($"✅ {provider.Name} succeeded.");
                 break;
             }
 
-            if (result.IsQuotaExceeded)
-            {
-                Console.WriteLine($"⚠️ {provider.Name} quota exceeded. Swapping to next available AI...");
-                continue;
-            }
-
-            // If it's a different error, we still try the next one but store this as our "best error" for now
-            Console.WriteLine($"❌ {provider.Name} failed: {result.Analysis.Substring(0, Math.Min(50, result.Analysis.Length))}...");
-            finalAnalysis = result.Analysis;
+            // Store the error but proceed to next provider
+            lastError = result.Analysis;
+            string failType = result.IsQuotaExceeded ? "quota exceeded" : "failed";
+            Console.WriteLine($"❌ {provider.Name} {failType}: {lastError.Substring(0, Math.Min(50, lastError.Length))}...");
         }
 
-        // 3. Last Resort Fallback (Mock) if all real AIPs failed or none configured
-        if (finalAnalysis.StartsWith("No analysis") || finalAnalysis.Contains("Error") || finalAnalysis.Contains("Exception"))
+        // Final result determination
+        string finalAnalysis;
+        if (successfulAnalysis != null)
+        {
+            finalAnalysis = successfulAnalysis;
+        }
+        else
         {
             Console.WriteLine("🛑 All configured AI services failed or were unavailable. Using Mock fallback.");
-            finalAnalysis = "MOCK ANALYSIS: This story is spine-chilling! (Score: 8.5/10)";
+            finalAnalysis = $"{ConfigConstants.MockAnalysisPrefix} This story is spine-chilling! (Score: 8.5/10)";
         }
 
-        // Parse Score
         var score = ParseScore(finalAnalysis);
         return (finalAnalysis, score);
     }
+
 
     private async Task<AiResult> AnalyzeWithOpenAIAsync(Story story)
     {
@@ -196,22 +199,22 @@ public class StoryAnalyzer : IStoryAnalyzer
                              responseString.Contains("RESOURCE_EXHAUSTED") ||
                              responseString.Contains("quota");
 
-                return new AiResult 
+                return new AiResult
                 {
                     Analysis = $"Gemini Error: {response.StatusCode} - {responseString}",
-                    IsQuotaExceeded = isQuota 
+                    IsQuotaExceeded = isQuota
                 };
             }
 
             using var doc = JsonDocument.Parse(responseString);
             if (doc.RootElement.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
             {
-                 var text = candidates[0]
-                    .GetProperty("content")
-                    .GetProperty("parts")[0]
-                    .GetProperty("text")
-                    .GetString();
-                 return new AiResult { Analysis = text?.Trim() ?? "Empty response", IsSuccess = true };
+                var text = candidates[0]
+                   .GetProperty("content")
+                   .GetProperty("parts")[0]
+                   .GetProperty("text")
+                   .GetString();
+                return new AiResult { Analysis = text?.Trim() ?? "Empty response", IsSuccess = true };
             }
             return new AiResult { Analysis = "No candidates in Gemini response" };
         }
@@ -244,7 +247,12 @@ public class StoryAnalyzer : IStoryAnalyzer
 
             if (!response.IsSuccessStatusCode)
             {
-                bool isQuota = (int)response.StatusCode == 429;
+                // Unify Quota Detection for generic OpenAI-compatible endpoints
+                bool isQuota = (int)response.StatusCode == 429 || // Too Many Requests
+                               (int)response.StatusCode == 402 || // Payment Required
+                               responseString.Contains("quota") ||
+                               responseString.Contains("limit");
+
                 return new AiResult { Analysis = $"{providerName} Error: {response.StatusCode}", IsQuotaExceeded = isQuota };
             }
 
@@ -257,6 +265,7 @@ public class StoryAnalyzer : IStoryAnalyzer
             return new AiResult { Analysis = $"{providerName} Exception: {ex.Message}" };
         }
     }
+
 
     private async Task<AiResult> AnalyzeCloudflareAsync(Story story)
     {
@@ -281,7 +290,12 @@ public class StoryAnalyzer : IStoryAnalyzer
 
             if (!response.IsSuccessStatusCode)
             {
-                return new AiResult { Analysis = $"Cloudflare Error: {response.StatusCode}" };
+                // Cloudflare often uses 429 or 401 for quota/limit issues on Workers AI
+                bool isQuota = (int)response.StatusCode == 429 ||
+                               responseString.Contains("quota") ||
+                               responseString.Contains("limit_exceeded");
+
+                return new AiResult { Analysis = $"Cloudflare Error: {response.StatusCode}", IsQuotaExceeded = isQuota };
             }
 
             using var doc = JsonDocument.Parse(responseString);
@@ -294,6 +308,7 @@ public class StoryAnalyzer : IStoryAnalyzer
         }
     }
 
+
     private async Task<AiResult> AnalyzeHuggingFaceAsync(Story story)
     {
         try
@@ -301,7 +316,7 @@ public class StoryAnalyzer : IStoryAnalyzer
             // Using Llama-3.2-3B which is very fast and often free on Inference API
             var modelId = "meta-llama/Llama-3.2-3B-Instruct";
             var url = $"https://api-inference.huggingface.co/models/{modelId}";
-            
+
             var payload = new
             {
                 inputs = CreateSafePrompt(story),
@@ -325,7 +340,7 @@ public class StoryAnalyzer : IStoryAnalyzer
             // Hugging Face return can be an array or object depending on model
             using var doc = JsonDocument.Parse(responseString);
             string? content = "";
-            
+
             if (doc.RootElement.ValueKind == JsonValueKind.Array)
             {
                 content = doc.RootElement[0].GetProperty("generated_text").GetString();
@@ -345,12 +360,29 @@ public class StoryAnalyzer : IStoryAnalyzer
 
     private double? ParseScore(string text)
     {
-        // Look for "Score: 7.5/10" or "Score: 7.5" or "7.5/10" or just "9.2"
-        var match = Regex.Match(text, @"(?:Score[:\s]*)?(\d+(\.\d+)?)", RegexOptions.IgnoreCase);
+        if (string.IsNullOrWhiteSpace(text) ||
+            ConfigConstants.ErrorKeywords.Any(k => text.Contains(k, StringComparison.OrdinalIgnoreCase)))
+        {
+            return null;
+        }
+
+        // Look for "Score: 7.5/10" or "Score: 7.5"
+        var match = Regex.Match(text, @"(?:Score[:\s]*)(\d+(\.\d+)?)", RegexOptions.IgnoreCase);
+
         if (match.Success && double.TryParse(match.Groups[1].Value, out double score))
         {
-            return score;
+            // Ensure score is in a realistic range for our 1-10 system
+            if (score <= 10) return score;
         }
+
+        // Fallback: search for any number if "Score:" prefix wasn't found, but be more strict
+        var fallbackMatch = Regex.Match(text, @"(\d+(\.\d+)?)(?:\s*/\s*10)?");
+        if (fallbackMatch.Success && double.TryParse(fallbackMatch.Groups[1].Value, out double fallbackScore))
+        {
+            if (fallbackScore <= 10) return fallbackScore;
+        }
+
         return null;
     }
+
 }

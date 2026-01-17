@@ -19,4 +19,19 @@ public static class ConfigConstants
     /// The default database user.
     /// </summary>
     public const string DefaultDbUser = "sa";
+
+    // AI Analysis Constants
+    public const string NoAnalysisAvailable = "No analysis available.";
+    public const string MockAnalysisPrefix = "MOCK ANALYSIS:";
+    public const string ProviderGemini = "Gemini";
+    public const string ProviderDeepSeek = "DeepSeek";
+    public const string ProviderOpenRouter = "OpenRouter";
+    public const string ProviderCloudflare = "Cloudflare";
+    public const string ProviderHuggingFace = "HuggingFace";
+    public const string ProviderOpenAI = "OpenAI";
+
+    // Error detection keywords
+    public static readonly string[] ErrorKeywords = { "Error:", "Exception:", "429", "RESOURCE_EXHAUSTED", "Quota" };
 }
+
+
