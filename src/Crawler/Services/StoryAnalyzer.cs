@@ -13,6 +13,7 @@ namespace Crawler.Services;
 public interface IStoryAnalyzer
 {
     Task<(string Analysis, double? Score)> AnalyzeAsync(Story story);
+    double? ParseScore(string text);
 }
 
 public class StoryAnalyzer : IStoryAnalyzer
@@ -363,7 +364,7 @@ public class StoryAnalyzer : IStoryAnalyzer
         }
     }
 
-    private double? ParseScore(string text)
+    public double? ParseScore(string text)
     {
         if (string.IsNullOrWhiteSpace(text) ||
             ConfigConstants.ErrorKeywords.Any(k => text.Contains(k, StringComparison.OrdinalIgnoreCase)))
@@ -371,20 +372,30 @@ public class StoryAnalyzer : IStoryAnalyzer
             return null;
         }
 
-        // Look for "Score: 7.5/10" or "Score: 7.5"
-        var match = Regex.Match(text, @"(?:Score[:\s]*)(\d+(\.\d+)?)", RegexOptions.IgnoreCase);
-
-        if (match.Success && double.TryParse(match.Groups[1].Value, out double score))
+        // 1. Try to find "Score" followed by a number, allowing for formatting characters (markdown, colons, etc.)
+        // Support: "Score: 7", "**Score**: 7", "Scary Score - 7", "### Score 7"
+        var match = Regex.Match(text, @"Score[:\s\*\-#]*(\d+(\.\d+)?)", RegexOptions.IgnoreCase);
+        if (match.Success && double.TryParse(match.Groups[1].Value, out double score) && score <= 10)
         {
-            // Ensure score is in a realistic range for our 1-10 system
-            if (score <= 10) return score;
+            return score;
         }
 
-        // Fallback: search for any number if "Score:" prefix wasn't found, but be more strict
-        var fallbackMatch = Regex.Match(text, @"(\d+(\.\d+)?)(?:\s*/\s*10)?");
-        if (fallbackMatch.Success && double.TryParse(fallbackMatch.Groups[1].Value, out double fallbackScore))
+        // 2. Fallback: Search for specifically "X/10" pattern anywhere
+        var formatMatch = Regex.Match(text, @"(\d+(\.\d+)?)\s*/\s*10");
+        if (formatMatch.Success && double.TryParse(formatMatch.Groups[1].Value, out double formatScore) && formatScore <= 10)
         {
-            if (fallbackScore <= 10) return fallbackScore;
+            return formatScore;
+        }
+
+        // 3. Last Resort: Any number that looks like a score, but SKIP common list notation like "1." or "2."
+        // We use a negative lookbehind to avoid matching numbers that look like list items at the start of something.
+        var fallbackMatches = Regex.Matches(text, @"(?<!\d\.\s)(\b\d+(\.\d+)?)");
+        foreach (Match fm in fallbackMatches)
+        {
+            if (double.TryParse(fm.Value, out double fallbackScore) && fallbackScore <= 10)
+            {
+                return fallbackScore;
+            }
         }
 
         return null;

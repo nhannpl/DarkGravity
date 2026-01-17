@@ -24,33 +24,43 @@ public class StoryProcessor : IStoryProcessor
 
     public async Task RepairDatabaseAsync()
     {
-        Console.WriteLine("🛠️ Maintenance: Scanning database for invalid analyses...");
+        Console.WriteLine("🛠️ Maintenance: Syncing database scores with latest parsing logic...");
 
-        var badStories = await _db.Stories
-            .Where(s => string.IsNullOrEmpty(s.AiAnalysis) || s.ScaryScore == null)
-            .ToListAsync();
-
-        // Also check keywords if not caught by null score
         var allStories = await _db.Stories.ToListAsync();
-        var toFix = allStories.Where(s => IsAnalysisInvalid(s.AiAnalysis)).ToList();
+        int repairCount = 0;
 
-        if (toFix.Count == 0)
+        foreach (var story in allStories)
         {
-            Console.WriteLine("✨ Database is healthy. No corruption found.");
-            return;
+            // Re-parse the existing text with our improved logic
+            var newScore = _analyzer.ParseScore(story.AiAnalysis);
+
+            // If the score was wrong (like the 1.0 vs 7.0 issue) or null, update it
+            if (story.ScaryScore != newScore)
+            {
+                story.ScaryScore = newScore;
+                _db.Stories.Update(story);
+                repairCount++;
+            }
+
+            // Also check if the text itself contains error messages
+            if (IsAnalysisInvalid(story.AiAnalysis))
+            {
+                Console.WriteLine($"   [RE-PROCESS] AI Analysis was invalid for: {story.Title}. Re-analyzing...");
+                (story.AiAnalysis, story.ScaryScore) = await _analyzer.AnalyzeAsync(story);
+                _db.Stories.Update(story);
+                repairCount++;
+            }
         }
 
-        Console.WriteLine($"🔍 Found {toFix.Count} stories needing repair. Starting recovery...");
-
-        foreach (var story in toFix)
+        if (repairCount > 0)
         {
-            Console.WriteLine($"   [REPAIR] Fixing: {story.Title}...");
-            (story.AiAnalysis, story.ScaryScore) = await _analyzer.AnalyzeAsync(story);
-            _db.Stories.Update(story);
+            await _db.SaveChangesAsync();
+            Console.WriteLine($"✅ Repair complete. Updated {repairCount} records.");
         }
-
-        await _db.SaveChangesAsync();
-        Console.WriteLine("✅ Repair complete.");
+        else
+        {
+            Console.WriteLine("✨ Database is synchronized.");
+        }
     }
 
     public async Task ProcessAndSaveStoriesAsync(List<Story> stories)
