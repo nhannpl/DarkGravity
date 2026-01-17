@@ -81,58 +81,62 @@ public class StoryAnalyzer : IStoryAnalyzer
     public async Task<(string Analysis, double? Score)> AnalyzeAsync(Story story)
     {
         // Define our providers in order of preference
-        var providers = new List<Func<Story, Task<AiResult>>>();
+        var providers = new List<(string Name, Func<Story, Task<AiResult>> Func)>();
 
         // 1. Gemini
         if (!string.IsNullOrEmpty(_geminiKey))
-            providers.Add(async (s) => await AnalyzeWithGeminiAsync(s));
+            providers.Add(("Gemini", async (s) => await AnalyzeWithGeminiAsync(s)));
 
         // 2. DeepSeek (Great free tier/low cost)
         if (!string.IsNullOrEmpty(_deepseekKey))
-            providers.Add(async (s) => await AnalyzeHttpAsync(s, "DeepSeek", "https://api.deepseek.com/v1/chat/completions", _deepseekKey, "deepseek-chat"));
+            providers.Add(("DeepSeek", async (s) => await AnalyzeHttpAsync(s, "DeepSeek", "https://api.deepseek.com/v1/chat/completions", _deepseekKey, "deepseek-chat")));
 
         // 3. Cloudflare Workers AI (Generous free tier)
         if (!string.IsNullOrEmpty(_cloudflareToken) && !string.IsNullOrEmpty(_cloudflareAccountId))
-            providers.Add(async (s) => await AnalyzeCloudflareAsync(s));
+            providers.Add(("Cloudflare", async (s) => await AnalyzeCloudflareAsync(s)));
 
         // 4. Hugging Face (Huge model gallery)
         if (!string.IsNullOrEmpty(_huggingFaceKey))
-            providers.Add(async (s) => await AnalyzeHuggingFaceAsync(s));
+            providers.Add(("HuggingFace", async (s) => await AnalyzeHuggingFaceAsync(s)));
 
         // 5. OpenRouter (Access to various free models like Llama 3)
         if (!string.IsNullOrEmpty(_openrouterKey))
-            providers.Add(async (s) => await AnalyzeHttpAsync(s, "OpenRouter", "https://openrouter.ai/api/v1/chat/completions", _openrouterKey, "meta-llama/llama-3.1-8b-instruct:free"));
+            providers.Add(("OpenRouter", async (s) => await AnalyzeHttpAsync(s, "OpenRouter", "https://openrouter.ai/api/v1/chat/completions", _openrouterKey, "meta-llama/llama-3.1-8b-instruct:free")));
 
-        // 5. OpenAI
+        // 6. OpenAI
         if (_openaiKernel != null)
-            providers.Add(async (s) => await AnalyzeWithOpenAIAsync(s));
+            providers.Add(("OpenAI", async (s) => await AnalyzeWithOpenAIAsync(s)));
 
         // Let's iterate through providers until one works
         string finalAnalysis = "No analysis available.";
         
         foreach (var provider in providers)
         {
-            var result = await provider(story);
+            Console.WriteLine($"🤖 Attempting analysis with: {provider.Name}...");
+            var result = await provider.Func(story);
+
             if (result.IsSuccess)
             {
                 finalAnalysis = result.Analysis;
+                Console.WriteLine($"✅ {provider.Name} succeeded.");
                 break;
             }
 
             if (result.IsQuotaExceeded)
             {
-                Console.WriteLine($"⚠️ Provider tier exceeded. Swapping to next available AI...");
+                Console.WriteLine($"⚠️ {provider.Name} quota exceeded. Swapping to next available AI...");
                 continue;
             }
 
-            // If it's a different error, we might still want to skip or log it
+            // If it's a different error, we still try the next one but store this as our "best error" for now
+            Console.WriteLine($"❌ {provider.Name} failed: {result.Analysis.Substring(0, Math.Min(50, result.Analysis.Length))}...");
             finalAnalysis = result.Analysis;
         }
 
         // 3. Last Resort Fallback (Mock) if all real AIPs failed or none configured
-        if (finalAnalysis.StartsWith("No analysis") || finalAnalysis.Contains("Error"))
+        if (finalAnalysis.StartsWith("No analysis") || finalAnalysis.Contains("Error") || finalAnalysis.Contains("Exception"))
         {
-            Console.WriteLine("🛑 All AI services failed or were unavailable. Using Mock fallback.");
+            Console.WriteLine("🛑 All configured AI services failed or were unavailable. Using Mock fallback.");
             finalAnalysis = "MOCK ANALYSIS: This story is spine-chilling! (Score: 8.5/10)";
         }
 
@@ -160,7 +164,8 @@ public class StoryAnalyzer : IStoryAnalyzer
     {
         try
         {
-            var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"; // Using Gemini 1.5 Flash for best speed/free tier
+            // Using Gemini 1.5 Flash - Best balance of speed and free tier limits
+            var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
             if (string.IsNullOrEmpty(_geminiKey)) return new AiResult { Analysis = "No Gemini Key" };
 
             var payload = new
@@ -185,10 +190,15 @@ public class StoryAnalyzer : IStoryAnalyzer
 
             if (!response.IsSuccessStatusCode)
             {
-                bool isQuota = (int)response.StatusCode == 429 || (int)response.StatusCode == 403;
+                // Robust Quota Detection: Check status code AND body for known Google error patterns
+                bool isQuota = (int)response.StatusCode == 429 ||
+                             (int)response.StatusCode == 403 ||
+                             responseString.Contains("RESOURCE_EXHAUSTED") ||
+                             responseString.Contains("quota");
+
                 return new AiResult 
-                { 
-                    Analysis = $"Gemini Error: {response.StatusCode}", 
+                {
+                    Analysis = $"Gemini Error: {response.StatusCode} - {responseString}",
                     IsQuotaExceeded = isQuota 
                 };
             }
@@ -203,7 +213,7 @@ public class StoryAnalyzer : IStoryAnalyzer
                     .GetString();
                  return new AiResult { Analysis = text?.Trim() ?? "Empty response", IsSuccess = true };
             }
-            return new AiResult { Analysis = "No candidates" };
+            return new AiResult { Analysis = "No candidates in Gemini response" };
         }
         catch (Exception ex)
         {

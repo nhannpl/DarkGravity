@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Data;
+using Shared.Constants;
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.Data.SqlClient;
 
 namespace Api.Extensions;
@@ -14,8 +16,8 @@ public static class ServiceCollectionExtensions
         services.AddSwaggerGen();
 
         // Database
-        var connectionString = config.GetConnectionString("DefaultConnection");
-        var dbPassword = config["DARKGRAVITY_DB_PASSWORD"];
+        var connectionString = config.GetConnectionString(ConfigConstants.DefaultConnectionKey);
+        var dbPassword = config[ConfigConstants.DbPasswordKey];
 
         if (!string.IsNullOrEmpty(dbPassword))
         {
@@ -25,6 +27,7 @@ public static class ServiceCollectionExtensions
             };
             connectionString = connectionBuilder.ConnectionString;
         }
+
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));

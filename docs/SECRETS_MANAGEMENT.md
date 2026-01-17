@@ -20,6 +20,8 @@ Used for AI Ingestion and analysis.
 | `OPENROUTER_API_KEY` | OpenRouter | Multi-model gateway |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare Workers AI | Serverless AI |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare | Account context |
+| `DARKGRAVITY_DB_PASSWORD` | SQL Server | Database authentication |
+
 
 ### 2. Project: API (`src/Api`)
 Used for serving the stories to the frontend.

@@ -11,12 +11,6 @@ public class AppDbContext : DbContext
 
     public DbSet<Story> Stories { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            // Fallback for Console App if not configured via DI
-            optionsBuilder.UseSqlServer("Server=localhost,1433;Database=DarkGravityDb;User Id=sa;Password=REMOVED_PASSWORD;TrustServerCertificate=True;");
-        }
-    }
+    // No longer overriding OnConfiguring with fallback strings to ensure security and proper DI usage.
+
 }

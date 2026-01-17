@@ -17,7 +17,7 @@ var config = new ConfigurationBuilder()
 // 1. Dependency Injection Setup
 var services = new ServiceCollection();
 services.AddSingleton<IConfiguration>(config);
-services.AddCrawlerServices();
+services.AddCrawlerServices(config);
 
 var serviceProvider = services.BuildServiceProvider();
 
