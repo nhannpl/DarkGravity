@@ -1,16 +1,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-
 using Shared.Data;
 using Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using Analyzer.Services;
 
-namespace Crawler.Services;
+namespace Analyzer;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCrawlerServices(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddAnalyzerServices(this IServiceCollection services, IConfiguration config)
     {
         // Database
         var connectionString = config.GetConnectionString(ConfigConstants.DefaultConnectionKey);
@@ -30,16 +30,8 @@ public static class ServiceCollectionExtensions
 
         services.AddHttpClient();
 
-        services.AddSingleton<IYoutubeClientWrapper, YoutubeClientWrapper>();
-        services.AddHttpClient<IRedditService, RedditService>(client =>
-        {
-            client.DefaultRequestHeaders.Add("User-Agent", "DarkGravityCrawler/1.0");
-        });
-        services.AddScoped<IYouTubeService, YouTubeService>();
-        services.AddScoped<IStoryProcessor, StoryProcessor>();
-        services.AddScoped<ICrawlerApp, CrawlerApp>();
+        services.AddScoped<IStoryAnalyzer, StoryAnalyzer>();
 
         return services;
     }
 }
-

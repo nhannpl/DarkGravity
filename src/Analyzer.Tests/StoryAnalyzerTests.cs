@@ -1,11 +1,11 @@
 using Shared.Models;
-using Crawler.Services;
+using Analyzer.Services;
 using Moq;
 using Moq.Contrib.HttpClient;
 using Xunit;
 using Microsoft.Extensions.Configuration;
 
-namespace Crawler.Tests;
+namespace Analyzer.Tests;
 
 public class StoryAnalyzerTests : IDisposable
 {
@@ -22,8 +22,6 @@ public class StoryAnalyzerTests : IDisposable
 
     public void Dispose()
     {
-        Environment.SetEnvironmentVariable("GEMINI_API_KEY", null);
-        Environment.SetEnvironmentVariable("OPENAI_API_KEY", null);
     }
 
     [Fact]
@@ -206,8 +204,7 @@ public class StoryAnalyzerTests : IDisposable
         var analyzer = new StoryAnalyzer(_client, _config.Object);
         var story = new Story { Title = "T", BodyText = "B" };
 
-        // Gemini returns 500 (not a quota issue, but still causes a failover in my code logic if it's the only one 
-        // OR returns Error: 500 which triggers the mock fallback check)
+        // Gemini returns 500 
         _handler.SetupRequest(HttpMethod.Post, r => r.RequestUri!.ToString().Contains("gemini"))
                 .ReturnsResponse(System.Net.HttpStatusCode.InternalServerError, "Error");
 

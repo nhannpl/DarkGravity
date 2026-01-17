@@ -14,53 +14,18 @@ public interface IStoryProcessor
 public class StoryProcessor : IStoryProcessor
 {
     private readonly AppDbContext _db;
-    private readonly IStoryAnalyzer _analyzer;
 
-    public StoryProcessor(AppDbContext db, IStoryAnalyzer analyzer)
+    public StoryProcessor(AppDbContext db)
     {
         _db = db;
-        _analyzer = analyzer;
     }
 
     public async Task RepairDatabaseAsync()
     {
-        Console.WriteLine("🛠️ Maintenance: Syncing database scores with latest parsing logic...");
-
-        var allStories = await _db.Stories.ToListAsync();
-        int repairCount = 0;
-
-        foreach (var story in allStories)
-        {
-            // Re-parse the existing text with our improved logic
-            var newScore = _analyzer.ParseScore(story.AiAnalysis);
-
-            // If the score was wrong (like the 1.0 vs 7.0 issue) or null, update it
-            if (story.ScaryScore != newScore)
-            {
-                story.ScaryScore = newScore;
-                _db.Stories.Update(story);
-                repairCount++;
-            }
-
-            // Also check if the text itself contains error messages
-            if (IsAnalysisInvalid(story.AiAnalysis))
-            {
-                Console.WriteLine($"   [RE-PROCESS] AI Analysis was invalid for: {story.Title}. Re-analyzing...");
-                (story.AiAnalysis, story.ScaryScore) = await _analyzer.AnalyzeAsync(story);
-                _db.Stories.Update(story);
-                repairCount++;
-            }
-        }
-
-        if (repairCount > 0)
-        {
-            await _db.SaveChangesAsync();
-            Console.WriteLine($"✅ Repair complete. Updated {repairCount} records.");
-        }
-        else
-        {
-            Console.WriteLine("✨ Database is synchronized.");
-        }
+        // This functionality is being moved to the Analyzer project.
+        // For now, we keep the interface method but leave it empty or print a redirect message.
+        Console.WriteLine("🛠️ Note: Database repair and re-analysis has moved to the Analyzer project.");
+        await Task.CompletedTask;
     }
 
     public async Task ProcessAndSaveStoriesAsync(List<Story> stories)
@@ -70,6 +35,8 @@ public class StoryProcessor : IStoryProcessor
             await _db.Database.MigrateAsync();
         }
 
+        int newCount = 0;
+        int skippedCount = 0;
 
         foreach (var story in stories)
         {
@@ -77,42 +44,29 @@ public class StoryProcessor : IStoryProcessor
 
             if (existingStory != null)
             {
-                if (!IsAnalysisInvalid(existingStory.AiAnalysis))
-                {
-                    Console.WriteLine($"   [SKIP] {story.Title}");
-                    continue;
-                }
-
-                // Self-healing: Re-process if previously failed
-                Console.WriteLine($"   [RE-PROCESS] Refreshing failed analysis for: {story.Title}...");
-                (existingStory.AiAnalysis, existingStory.ScaryScore) = await _analyzer.AnalyzeAsync(story);
-                _db.Stories.Update(existingStory);
+                skippedCount++;
                 continue;
             }
 
-            Console.WriteLine($"   [NEW] Processing: {story.Title}...");
+            Console.WriteLine($"   [NEW] Found: {story.Title}...");
 
-            // Delegate analysis to the analyzer service
-            (story.AiAnalysis, story.ScaryScore) = await _analyzer.AnalyzeAsync(story);
+            // Set analysis to empty - the Analyzer project will pick this up
+            story.AiAnalysis = string.Empty;
+            story.ScaryScore = null;
 
             _db.Stories.Add(story);
+            newCount++;
         }
 
-        await _db.SaveChangesAsync();
+        if (newCount > 0)
+        {
+            await _db.SaveChangesAsync();
+            Console.WriteLine($"✅ Saved {newCount} new stories. Run the Analyzer project to process them.");
+        }
+
+        if (skippedCount > 0)
+        {
+            Console.WriteLine($"ℹ️ Skipped {skippedCount} existing stories.");
+        }
     }
-
-    private bool IsAnalysisInvalid(string? analysis)
-    {
-        if (string.IsNullOrWhiteSpace(analysis)) return true;
-
-        // Treat Mock Analysis as 'invalid' for the purpose of Repair, 
-        // essentially allowing us to 'upgrade' to real AI if it becomes available.
-        if (analysis.StartsWith(Shared.Constants.ConfigConstants.MockAnalysisPrefix, System.StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        // Check against centralized error keywords
-        return Shared.Constants.ConfigConstants.ErrorKeywords.Any(k =>
-            analysis.Contains(k, System.StringComparison.OrdinalIgnoreCase));
-    }
-
 }

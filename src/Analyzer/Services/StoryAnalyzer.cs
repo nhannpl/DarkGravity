@@ -1,14 +1,13 @@
 using Shared.Models;
 using Shared.Constants;
 using Microsoft.SemanticKernel;
-
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Crawler.Services;
+namespace Analyzer.Services;
 
 public interface IStoryAnalyzer
 {
@@ -35,7 +34,7 @@ public class StoryAnalyzer : IStoryAnalyzer
         // Setup Keys from Configuration
         _geminiKey = config["GEMINI_API_KEY"];
         _deepseekKey = config["DEEPSEEK_API_KEY"];
-        _cloudflareToken = config["CLOUDF_API_TOKEN"]; // Fixed typo in previous step mapping
+        _cloudflareToken = config["CLOUDF_API_TOKEN"]; 
         _cloudflareAccountId = config["CLOUDFLARE_ACCOUNT_ID"];
         _openrouterKey = config["OPENROUTER_API_KEY"];
         _mistralKey = config["MISTRAL_API_KEY"];
@@ -54,8 +53,6 @@ public class StoryAnalyzer : IStoryAnalyzer
 
     private string CreateSafePrompt(Story story)
     {
-        // Safety Strategy: Use clear delimiters and explicit security instructions 
-        // to prevent the AI from following malicious instructions embedded in the story.
         var truncatedBody = story.BodyText.Substring(0, Math.Min(500, story.BodyText.Length));
 
         return $"""
@@ -83,39 +80,29 @@ public class StoryAnalyzer : IStoryAnalyzer
 
     public async Task<(string Analysis, double? Score)> AnalyzeAsync(Story story)
     {
-        // Define our providers in order of preference
         var providers = new List<(string Name, Func<Story, Task<AiResult>> Func)>();
 
-        // 1. Gemini
         if (!string.IsNullOrEmpty(_geminiKey))
             providers.Add((ConfigConstants.ProviderGemini, async (s) => await AnalyzeWithGeminiAsync(s)));
 
-        // 2. DeepSeek
         if (!string.IsNullOrEmpty(_deepseekKey))
             providers.Add((ConfigConstants.ProviderDeepSeek, async (s) => await AnalyzeHttpAsync(s, ConfigConstants.ProviderDeepSeek, "https://api.deepseek.com/v1/chat/completions", _deepseekKey, "deepseek-chat")));
 
-        // 3. Mistral (Solid fallback with high quality)
         if (!string.IsNullOrEmpty(_mistralKey))
             providers.Add((ConfigConstants.ProviderMistral, async (s) => await AnalyzeHttpAsync(s, ConfigConstants.ProviderMistral, "https://api.mistral.ai/v1/chat/completions", _mistralKey, "mistral-small-latest")));
 
-        // 4. Cloudflare
         if (!string.IsNullOrEmpty(_cloudflareToken) && !string.IsNullOrEmpty(_cloudflareAccountId))
             providers.Add((ConfigConstants.ProviderCloudflare, async (s) => await AnalyzeCloudflareAsync(s)));
 
-        // 5. Hugging Face
         if (!string.IsNullOrEmpty(_huggingFaceKey))
             providers.Add((ConfigConstants.ProviderHuggingFace, async (s) => await AnalyzeHuggingFaceAsync(s)));
 
-        // 6. OpenRouter
         if (!string.IsNullOrEmpty(_openrouterKey))
             providers.Add((ConfigConstants.ProviderOpenRouter, async (s) => await AnalyzeHttpAsync(s, ConfigConstants.ProviderOpenRouter, "https://openrouter.ai/api/v1/chat/completions", _openrouterKey, "meta-llama/llama-3.1-8b-instruct:free")));
 
-        // 7. OpenAI
         if (_openaiKernel != null)
             providers.Add((ConfigConstants.ProviderOpenAI, async (s) => await AnalyzeWithOpenAIAsync(s)));
 
-
-        // Failover Loop
         string? successfulAnalysis = null;
         string? lastError = null;
 
@@ -131,13 +118,11 @@ public class StoryAnalyzer : IStoryAnalyzer
                 break;
             }
 
-            // Store the error but proceed to next provider
             lastError = result.Analysis;
             string failType = result.IsQuotaExceeded ? "quota exceeded" : "failed";
             Console.WriteLine($"❌ {provider.Name} {failType}: {lastError.Substring(0, Math.Min(50, lastError.Length))}...");
         }
 
-        // Final result determination
         string finalAnalysis;
         if (successfulAnalysis != null)
         {
@@ -152,7 +137,6 @@ public class StoryAnalyzer : IStoryAnalyzer
         var score = ParseScore(finalAnalysis);
         return (finalAnalysis, score);
     }
-
 
     private async Task<AiResult> AnalyzeWithOpenAIAsync(Story story)
     {
@@ -173,7 +157,6 @@ public class StoryAnalyzer : IStoryAnalyzer
     {
         try
         {
-            // Using Gemini 1.5 Flash - Best balance of speed and free tier limits
             var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
             if (string.IsNullOrEmpty(_geminiKey)) return new AiResult { Analysis = "No Gemini Key" };
 
@@ -199,7 +182,6 @@ public class StoryAnalyzer : IStoryAnalyzer
 
             if (!response.IsSuccessStatusCode)
             {
-                // Robust Quota Detection: Check status code AND body for known Google error patterns
                 bool isQuota = (int)response.StatusCode == 429 ||
                              (int)response.StatusCode == 403 ||
                              responseString.Contains("RESOURCE_EXHAUSTED") ||
@@ -253,9 +235,8 @@ public class StoryAnalyzer : IStoryAnalyzer
 
             if (!response.IsSuccessStatusCode)
             {
-                // Unify Quota Detection for generic OpenAI-compatible endpoints
-                bool isQuota = (int)response.StatusCode == 429 || // Too Many Requests
-                               (int)response.StatusCode == 402 || // Payment Required
+                bool isQuota = (int)response.StatusCode == 429 || 
+                               (int)response.StatusCode == 402 || 
                                responseString.Contains("quota") ||
                                responseString.Contains("limit");
 
@@ -296,7 +277,6 @@ public class StoryAnalyzer : IStoryAnalyzer
 
             if (!response.IsSuccessStatusCode)
             {
-                // Cloudflare often uses 429 or 401 for quota/limit issues on Workers AI
                 bool isQuota = (int)response.StatusCode == 429 ||
                                responseString.Contains("quota") ||
                                responseString.Contains("limit_exceeded");
@@ -319,7 +299,6 @@ public class StoryAnalyzer : IStoryAnalyzer
     {
         try
         {
-            // Using Llama-3.2-3B which is very fast and often free on Inference API
             var modelId = "meta-llama/Llama-3.2-3B-Instruct";
             var url = $"https://api-inference.huggingface.co/models/{modelId}";
 
@@ -343,7 +322,6 @@ public class StoryAnalyzer : IStoryAnalyzer
                 return new AiResult { Analysis = $"Hugging Face Error: {response.StatusCode}", IsQuotaExceeded = isQuota };
             }
 
-            // Hugging Face return can be an array or object depending on model
             using var doc = JsonDocument.Parse(responseString);
             string? content = "";
 
@@ -372,23 +350,18 @@ public class StoryAnalyzer : IStoryAnalyzer
             return null;
         }
 
-        // 1. Try to find "Score" followed by a number, allowing for formatting characters (markdown, colons, etc.)
-        // Support: "Score: 7", "**Score**: 7", "Scary Score - 7", "### Score 7"
         var match = Regex.Match(text, @"Score[:\s\*\-#]*(\d+(\.\d+)?)", RegexOptions.IgnoreCase);
         if (match.Success && double.TryParse(match.Groups[1].Value, out double score) && score <= 10)
         {
             return score;
         }
 
-        // 2. Fallback: Search for specifically "X/10" pattern anywhere
         var formatMatch = Regex.Match(text, @"(\d+(\.\d+)?)\s*/\s*10");
         if (formatMatch.Success && double.TryParse(formatMatch.Groups[1].Value, out double formatScore) && formatScore <= 10)
         {
             return formatScore;
         }
 
-        // 3. Last Resort: Any number that looks like a score, but SKIP common list notation like "1." or "2."
-        // We use a negative lookbehind to avoid matching numbers that look like list items at the start of something.
         var fallbackMatches = Regex.Matches(text, @"(?<!\d\.\s)(\b\d+(\.\d+)?)");
         foreach (Match fm in fallbackMatches)
         {
@@ -400,5 +373,4 @@ public class StoryAnalyzer : IStoryAnalyzer
 
         return null;
     }
-
 }

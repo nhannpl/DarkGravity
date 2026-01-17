@@ -44,12 +44,16 @@ public class CrawlerAppTests
     {
         // Arrange
         var mockReddit = new Mock<IRedditService>();
+        var mockYoutube = new Mock<IYouTubeService>();
+        var mockProcessor = new Mock<IStoryProcessor>();
+        var mockDb = new Mock<AppDbContext>(new DbContextOptions<AppDbContext>());
+
         mockReddit.Setup(r => r.GetTopStoriesAsync(It.IsAny<string>()))
             .ThrowsAsync(new Exception("Fail"));
 
-        var app = new CrawlerApp(mockReddit.Object, null!, null!, null!);
+        var app = new CrawlerApp(mockReddit.Object, mockYoutube.Object, mockProcessor.Object, mockDb.Object);
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => app.RunAsync());
+        await Assert.ThrowsAnyAsync<Exception>(() => app.RunAsync());
     }
 }

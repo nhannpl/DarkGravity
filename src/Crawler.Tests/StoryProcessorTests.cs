@@ -9,7 +9,6 @@ namespace Crawler.Tests;
 public class StoryProcessorTests
 {
     private readonly AppDbContext _db;
-    private readonly Mock<IStoryAnalyzer> _mockAnalyzer;
     private readonly StoryProcessor _processor;
 
     public StoryProcessorTests()
@@ -19,12 +18,12 @@ public class StoryProcessorTests
             .Options;
         _db = new AppDbContext(options);
 
-        _mockAnalyzer = new Mock<IStoryAnalyzer>();
-        _processor = new StoryProcessor(_db, _mockAnalyzer.Object);
+        // StoryProcessor no longer depends on IStoryAnalyzer
+        _processor = new StoryProcessor(_db);
     }
 
     [Fact]
-    public async Task ProcessAndSaveStoriesAsync_ShouldSaveNewStories()
+    public async Task ProcessAndSaveStoriesAsync_ShouldSaveNewStories_WithEmptyAnalysis()
     {
         // Arrange
         var stories = new List<Story>
@@ -33,17 +32,16 @@ public class StoryProcessorTests
             new Story { ExternalId = "s2", Title = "Story 2", BodyText = "Text 2" }
         };
 
-        _mockAnalyzer.Setup(a => a.AnalyzeAsync(It.IsAny<Story>()))
-            .ReturnsAsync(("AI Analysis", 7.5));
-
         // Act
         await _processor.ProcessAndSaveStoriesAsync(stories);
 
         // Assert
         Assert.Equal(2, await _db.Stories.CountAsync());
         var savedStory = await _db.Stories.FirstAsync(s => s.ExternalId == "s1");
-        Assert.Equal("AI Analysis", savedStory.AiAnalysis);
-        Assert.Equal(7.5, savedStory.ScaryScore);
+        
+        // Now Crawler saves it as empty, Analyzer picks it up later
+        Assert.Equal(string.Empty, savedStory.AiAnalysis);
+        Assert.Null(savedStory.ScaryScore);
     }
 
     [Fact]
@@ -58,9 +56,6 @@ public class StoryProcessorTests
             new Story { ExternalId = "existing", Title = "New", BodyText = "New Text" },
             new Story { ExternalId = "unique", Title = "Unique", BodyText = "Unique Text" }
         };
-
-        _mockAnalyzer.Setup(a => a.AnalyzeAsync(It.IsAny<Story>()))
-            .ReturnsAsync(("AI Analysis", 5.0));
 
         // Act
         await _processor.ProcessAndSaveStoriesAsync(stories);
