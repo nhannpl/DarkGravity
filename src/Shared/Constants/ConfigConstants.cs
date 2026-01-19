@@ -32,8 +32,11 @@ public static class ConfigConstants
 
     public const string ProviderOpenAI = "OpenAI";
 
+    // Kafka Constants
+    public const string KafkaBootstrapServers = "KAFKA_BOOTSTRAP_SERVERS";
+    public const string KafkaTopicStoryFetched = "story-fetched";
+    public const string KafkaClusterName = "local";
+
     // Error detection keywords
     public static readonly string[] ErrorKeywords = { "Error:", "Exception:", "429", "RESOURCE_EXHAUSTED", "Quota" };
 }
-
-

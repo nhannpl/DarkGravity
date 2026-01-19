@@ -1,6 +1,8 @@
 using Shared.Data;
 using Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using MassTransit;
+using DarkGravity.Contracts.Events;
 
 namespace Crawler.Services;
 
@@ -14,10 +16,12 @@ public interface IStoryProcessor
 public class StoryProcessor : IStoryProcessor
 {
     private readonly AppDbContext _db;
+    private readonly ITopicProducer<StoryFetched> _producer;
 
-    public StoryProcessor(AppDbContext db)
+    public StoryProcessor(AppDbContext db, ITopicProducer<StoryFetched> producer)
     {
         _db = db;
+        _producer = producer;
     }
 
     public async Task RepairDatabaseAsync()
@@ -37,6 +41,7 @@ public class StoryProcessor : IStoryProcessor
 
         int newCount = 0;
         int skippedCount = 0;
+        var newStories = new List<Story>();
 
         foreach (var story in stories)
         {
@@ -55,13 +60,26 @@ public class StoryProcessor : IStoryProcessor
             story.ScaryScore = null;
 
             _db.Stories.Add(story);
+            newStories.Add(story);
             newCount++;
         }
 
         if (newCount > 0)
         {
             await _db.SaveChangesAsync();
-            Console.WriteLine($"✅ Saved {newCount} new stories. Run the Analyzer project to process them.");
+
+            // Fire-and-forget events for the Analyzer
+            foreach (var story in newStories)
+            {
+                await _producer.Produce(new StoryFetched(
+                    story.Id,
+                    story.Title,
+                    story.BodyText,
+                    story.Url
+                ));
+            }
+
+            Console.WriteLine($"✅ Saved {newCount} new stories and triggered analysis events.");
         }
 
         if (skippedCount > 0)

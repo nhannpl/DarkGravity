@@ -5,6 +5,8 @@ using Shared.Data;
 using Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using MassTransit;
+using DarkGravity.Contracts.Events;
 
 namespace Crawler.Services;
 
@@ -38,6 +40,32 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IYouTubeService, YouTubeService>();
         services.AddScoped<IStoryProcessor, StoryProcessor>();
         services.AddScoped<ICrawlerApp, CrawlerApp>();
+
+        // MassTransit + Kafka
+        services.AddMassTransit(x =>
+        {
+            x.UsingInMemory((context, cfg) =>
+            {
+                cfg.ConfigureEndpoints(context);
+            });
+
+            x.AddRider(rider =>
+            {
+                rider.AddProducer<StoryFetched>(ConfigConstants.KafkaTopicStoryFetched);
+
+                rider.UsingKafka((context, k) =>
+                {
+                    k.Host(config[ConfigConstants.KafkaBootstrapServers] ?? "localhost:9092");
+                });
+            });
+
+            // Outbox Pattern
+            x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+            {
+                o.UseSqlServer();
+                o.UseBusOutbox();
+            });
+        });
 
         return services;
     }

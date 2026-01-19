@@ -9,7 +9,7 @@ namespace DarkGravity.Contracts.Events;
 /// <param name="BodyText">The full text content of the story.</param>
 /// <param name="Url">The source URL of the story.</param>
 public record StoryFetched(
-    int StoryId, 
+    Guid StoryId,
     string Title, 
     string BodyText, 
     string Url);

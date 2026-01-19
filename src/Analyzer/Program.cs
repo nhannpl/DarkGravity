@@ -39,59 +39,10 @@ public class Program
 
         var host = builder.Build();
 
-        Console.WriteLine("🚀 DarkGravity Analyzer Started");
+        Console.WriteLine("🚀 DarkGravity Analyzer Started (Event-Driven Mode)");
+        Console.WriteLine("📡 Listening for StoryFetched events on Kafka...");
 
-        using (var scope = host.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var analyzer = scope.ServiceProvider.GetRequiredService<IStoryAnalyzer>();
-
-            // Find stories that need analysis:
-            // 1. AiAnalysis is null or empty
-            // 2. AiAnalysis contains error keywords (Self-healing)
-            var pendingStories = await db.Stories
-                .Where(s => string.IsNullOrEmpty(s.AiAnalysis) ||
-                            s.AiAnalysis.StartsWith(Shared.Constants.ConfigConstants.MockAnalysisPrefix))
-                .ToListAsync();
-
-            if (pendingStories.Count == 0)
-            {
-                Console.WriteLine("✨ No stories pending analysis. Everything is up to date!");
-                return;
-            }
-
-            Console.WriteLine($"📊 Found {pendingStories.Count} stories to analyze.");
-
-            int successCount = 0;
-            int failCount = 0;
-
-            foreach (var story in pendingStories)
-            {
-                Console.WriteLine($"🔍 Analyzing: {story.Title}...");
-
-                try
-                {
-                    (story.AiAnalysis, story.ScaryScore) = await analyzer.AnalyzeAsync(story);
-                    db.Stories.Update(story);
-
-                    // Save after each one to ensure progress is kept if we crash
-                    await db.SaveChangesAsync();
-                    successCount++;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"❌ Error analyzing story {story.Id}: {ex.Message}");
-                    failCount++;
-                }
-            }
-
-            Console.WriteLine("\n--- Analysis Summary ---");
-            Console.WriteLine($"✅ Successfully analyzed: {successCount}");
-            Console.WriteLine($"❌ Failed: {failCount}");
-            Console.WriteLine("------------------------");
-        }
-
-        Console.WriteLine("👋 Analyzer finished work.");
+        await host.RunAsync();
     }
 
     private static void LoadEnv(string filePath)
