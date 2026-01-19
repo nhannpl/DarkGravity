@@ -51,8 +51,8 @@ You requested a smaller, step-by-step approach. We will build this project **ite
 2.  Open `http://localhost:xxxx/swagger`.
 3.  Execute `GET /api/stories` and confirm we see the Reddit stories fetched by the Crawler.
 
-## Phase 5: The "Dark" Frontend (Visualizing the Abyss)
-**Goal**: Create a premium, immersive web experience to consume the horror stories.
+## Phase 5: The "Dark" Evolution (Frontend & Decoupling) [COMPLETED]
+**Goal**: Create a premium web experience and separate crawling from analysis for better stability.
 
 ### 5.1. The Foundation (Design & Branding)
 1.  **Initialize Angular**: Create the project in `src/Web` using Angular 17/18+.
@@ -77,16 +77,36 @@ You requested a smaller, step-by-step approach. We will build this project **ite
 2.  **Search/Filter**: Quick search through the abyss of stories.
 3.  **Loading States**: Implement "Ghost" skeletons (shimmering placeholders) during data fetch.
 
-### 5.5. Verify
-1.  Run the .NET Api and Angular Web app simultaneously.
-2.  Ensure stories flow from Reddit -> Crawler -> SQL -> API -> Angular UI.
+### 5.6. Backend Decoupling (The Analyzer) [COMPLETED]
+1.  **Project Creation**: Created `src/Analyzer` purely for AI logic.
+2.  **Migration**: Moved `StoryAnalyzer` and AI dependencies from Crawler to Analyzer.
+3.  **Refactor**: Updated Crawler to save stories with empty analysis fields.
+4.  **Database Indexing**: Added unique index on `ExternalId` for robust deduplication.
+5.  **Verify**: Ran Crawler then Analyzer sequentially to prove decoupling works.
+
+### 5.7. Final Verification
+1.  Run the .NET Api, Angular Web app, Crawler, and Analyzer.
+2.  Ensure stories flow from Reddit -> Crawler -> SQL -> Analyzer -> SQL -> API -> Angular UI.
 
 ## Phase 6: Scaling Up (The "Resume" Features)
-**Goal**: *Now* we add the advanced enterprise features.
-1.  Introduce **Kafka** to decouple the Crawler from the AI.
-2.  Add **Vector Search** for "Vibe" matching.
-3.  Add **Power Platform** for the admin dashboard.
+**Goal**: *Now* we add the advanced enterprise features using event-driven architecture and senior-level architectural patterns.
+
+### 6.1. Event Bus Foundation (Reliability & Stability)
+1.  **Contracts Library**: Create `src/Contracts` containing ONLY interfaces and records (Low Coupling).
+2.  **MassTransit + Kafka**: Implement the event bus in Crawler and Analyzer using the Contracts.
+3.  **Outbox Pattern**: Enable MassTransit's Transactional Outbox to ensure database and message bus are perfectly synced.
+4.  **Resiliency (Polly)**: Configure Retry and Circuit Breaker policies for AI API calls.
+
+### 6.2. Advanced Processing (Scalability & Observability)
+1.  **Idempotent Consumers**: Ensure the Analyzer can safely receive duplicate messages without re-calling the AI.
+2.  **OpenTelemetry**: Implement distributed tracing to track a story's journey from Reddit to the UI.
+3.  **Vector Search**: Integrate a Vector Database (e.g., Qdrant) for semantic "vibe" matching.
+
+### 6.3. Enterprise Monitoring
+1.  **Admin Dashboard**: Integrate Power Platform for high-level monitoring and manual story curation.
 
 ---
-**Current Status**: Ready to start Phase 5.
-**Action**: Create the Angular Frontend.
+**Current Status**: Phase 5 (Frontend & Decoupling) is complete. 
+**Next Objective**: Phase 6.1 (Event Bus with Kafka & MassTransit).
+
+[COMPLETED]: https://github.com/nhan/DarkGravity

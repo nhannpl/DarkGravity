@@ -7,7 +7,7 @@ We use the `.NET User Secrets` manager for local development. This keeps keys ou
 
 **See [USER_SECRETS_EXAMPLE.md](./USER_SECRETS_EXAMPLE.md) for a quick-start template.**
 
-### 1. Project: Crawler (`src/Crawler`)
+### 1. Project: Analyzer (`src/Analyzer`)
 Used for AI Ingestion and analysis.
 
 | Key | Service | Purpose |
@@ -48,9 +48,9 @@ Run these commands from the project root.
 ### 1. View Current Secrets
 To see all configured keys for both projects:
 
-**Crawler (AI Keys):**
+**Analyzer (AI Keys):**
 ```bash
-dotnet user-secrets list --project src/Crawler
+dotnet user-secrets list --project src/Analyzer
 ```
 
 **API (Infrastructure Keys):**
@@ -63,22 +63,23 @@ Replace `your_value` with your actual secret. Use **single quotes** if the value
 
 **For AI Keys:**
 ```bash
-dotnet user-secrets set "OPENAI_API_KEY" "your_openai_key" --project src/Crawler
+dotnet user-secrets set "OPENAI_API_KEY" "your_openai_key" --project src/Analyzer
 ```
 
 **For Database Password:**
 ```bash
+dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Analyzer
 dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Api
 ```
 
 # Multi-provider shortcuts
-dotnet user-secrets set "GEMINI_API_KEY" "..." --project src/Crawler
-dotnet user-secrets set "DEEPSEEK_API_KEY" "..." --project src/Crawler
-dotnet user-secrets set "MISTRAL_API_KEY" "..." --project src/Crawler
-dotnet user-secrets set "HUGGINGFACE_API_KEY" "..." --project src/Crawler
-dotnet user-secrets set "OPENROUTER_API_KEY" "..." --project src/Crawler
-dotnet user-secrets set "CLOUDFLARE_API_TOKEN" "..." --project src/Crawler
-dotnet user-secrets set "CLOUDFLARE_ACCOUNT_ID" "..." --project src/Crawler
+dotnet user-secrets set "GEMINI_API_KEY" "..." --project src/Analyzer
+dotnet user-secrets set "DEEPSEEK_API_KEY" "..." --project src/Analyzer
+dotnet user-secrets set "MISTRAL_API_KEY" "..." --project src/Analyzer
+dotnet user-secrets set "HUGGINGFACE_API_KEY" "..." --project src/Analyzer
+dotnet user-secrets set "OPENROUTER_API_KEY" "..." --project src/Analyzer
+dotnet user-secrets set "CLOUDFLARE_API_TOKEN" "..." --project src/Analyzer
+dotnet user-secrets set "CLOUDFLARE_ACCOUNT_ID" "..." --project src/Analyzer
 ```
 
 ### 3. Remove a Secret

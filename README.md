@@ -12,7 +12,8 @@
 
 The repository is organized into a modular, decoupled architecture following **SOLID** principles and **Clean Architecture** patterns:
 
-*   **`src/Crawler`**: A .NET Console application that acts as the "Ingestion Engine". It fetches stories from multiple subreddits (r/nosleep, r/shortscarystories) and YouTube transcripts.
+*   **`src/Crawler`**: A .NET Console application that acts as the "Ingestion Engine". It fetches stories from multiple subreddits (r/nosleep, r/shortscarystories) and YouTube transcripts. It saves raw data to the database, leaving analysis for the next stage.
+*   **`src/Analyzer`**: A dedicated AI processing project. It scans the database for pending stories, runs them through the multi-provider AI failover engine, and updates the "Scary Scores" and analysis.
 *   **`src/Api`**: An ASP.NET Core Web API that serves the analyzed stories to the frontend via RESTful endpoints.
 *   **`src/Shared`**: A Class Library containing shared Domain Models (`Story`) and the Entity Framework Core `AppDbContext`. This ensures high cohesion and low coupling across the system.
 *   **`src/Web`**: A high-end Angular 18+ application featuring glassmorphism, fluid animations, and a premium "void" aesthetic.
@@ -49,14 +50,16 @@ docker compose -f infra/docker-compose.yml up -d
 Ensure you have the required AI API keys and database credentials set up using .NET User Secrets. This keeps sensitive data out of the repository. See [Docs: Secrets Management](docs/SECRETS_MANAGEMENT.md) for detailed instructions.
 
 ```bash
-# Set AI Keys
-dotnet user-secrets set "GEMINI_API_KEY" "your_key" --project src/Crawler
+# Set AI Keys (Move to Analyzer project)
+dotnet user-secrets set "GEMINI_API_KEY" "your_key" --project src/Analyzer
 
 # Set Database Password (Namespaced)
 dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Api
+dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Analyzer
+dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Crawler
 
 # View all configured secrets
-dotnet user-secrets list --project src/Crawler
+dotnet user-secrets list --project src/Analyzer
 dotnet user-secrets list --project src/Api
 ```
 
@@ -65,7 +68,11 @@ dotnet user-secrets list --project src/Api
     ```bash
     dotnet run --project src/Crawler
     ```
-2.  **Start the API**:
+2.  **Analyze the stories** (AI Processing):
+    ```bash
+    dotnet run --project src/Analyzer
+    ```
+3.  **Start the API**:
     ```bash
     dotnet run --project src/Api
     ```
