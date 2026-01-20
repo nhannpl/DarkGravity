@@ -56,7 +56,6 @@ dotnet user-secrets set "GEMINI_API_KEY" "your_key" --project src/Analyzer
 # Set Database Password (Namespaced)
 dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Api
 dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Analyzer
-dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Crawler
 
 # View all configured secrets
 dotnet user-secrets list --project src/Analyzer

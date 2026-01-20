@@ -3,12 +3,16 @@ using Crawler.Services;
 using Shared.Models;
 using Shared.Data;
 using Microsoft.EntityFrameworkCore;
+using MassTransit;
+using DarkGravity.Contracts.Events;
 
 namespace Crawler.Tests;
 
 public class StoryProcessorTests
 {
     private readonly AppDbContext _db;
+    private readonly Mock<ITopicProducer<StoryFetched>> _mockProducer;
+    private readonly Mock<IServiceProvider> _mockServiceProvider;
     private readonly StoryProcessor _processor;
 
     public StoryProcessorTests()
@@ -17,9 +21,15 @@ public class StoryProcessorTests
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         _db = new AppDbContext(options);
+        _mockProducer = new Mock<ITopicProducer<StoryFetched>>();
 
-        // StoryProcessor no longer depends on IStoryAnalyzer
-        _processor = new StoryProcessor(_db);
+        // Mock IServiceProvider to return the mocked producer when requested
+        _mockServiceProvider = new Mock<IServiceProvider>();
+        _mockServiceProvider
+            .Setup(sp => sp.GetService(typeof(ITopicProducer<StoryFetched>)))
+            .Returns(_mockProducer.Object);
+
+        _processor = new StoryProcessor(_db, _mockServiceProvider.Object);
     }
 
     [Fact]

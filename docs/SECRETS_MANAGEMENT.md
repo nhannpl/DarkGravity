@@ -84,7 +84,7 @@ dotnet user-secrets set "CLOUDFLARE_ACCOUNT_ID" "..." --project src/Analyzer
 
 ### 3. Remove a Secret
 ```bash
-dotnet user-secrets remove "KEY_NAME" --project src/Crawler
+dotnet user-secrets remove "KEY_NAME" --project src/Analyzer
 ```
 
 ---
@@ -95,4 +95,4 @@ The secrets are stored in a JSON file outside of your project directory:
 
 ## 🔗 References
 - [Official Microsoft Docs: User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets)
-- [StoryAnalyzer.cs Source](../src/Crawler/Services/StoryAnalyzer.cs)
+- [StoryAnalyzer.cs Source](../src/Analyzer/Services/StoryAnalyzer.cs)

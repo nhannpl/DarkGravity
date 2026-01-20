@@ -91,11 +91,11 @@ You requested a smaller, step-by-step approach. We will build this project **ite
 ## Phase 6: Scaling Up (The "Resume" Features)
 **Goal**: *Now* we add the advanced enterprise features using event-driven architecture and senior-level architectural patterns.
 
-### 6.1. Event Bus Foundation (Reliability & Stability)
-1.  **Contracts Library**: Create `src/Contracts` containing ONLY interfaces and records (Low Coupling).
-2.  **MassTransit + Kafka**: Implement the event bus in Crawler and Analyzer using the Contracts.
-3.  **Outbox Pattern**: Enable MassTransit's Transactional Outbox to ensure database and message bus are perfectly synced.
-4.  **Resiliency (Polly)**: Configure Retry and Circuit Breaker policies for AI API calls.
+### 6.1. Event Bus Foundation (Reliability & Stability) [COMPLETED]
+1.  **Contracts Library** [COMPLETED]: Created `src/Contracts` containing ONLY interfaces and records (Low Coupling).
+2.  **MassTransit + Kafka** [COMPLETED]: Implemented the event bus in Crawler and Analyzer using the Contracts.
+3.  **Outbox Pattern** [COMPLETED]: Enabled MassTransit's Transactional Outbox to ensure database and message bus are perfectly synced.
+4.  **Resiliency (Polly)** [COMPLETED]: Configured Retry policies for AI API calls using MassTransit's built-in resiliency features.
 
 ### 6.2. Advanced Processing (Scalability & Observability)
 1.  **Idempotent Consumers**: Ensure the Analyzer can safely receive duplicate messages without re-calling the AI.
@@ -106,7 +106,7 @@ You requested a smaller, step-by-step approach. We will build this project **ite
 1.  **Admin Dashboard**: Integrate Power Platform for high-level monitoring and manual story curation.
 
 ---
-**Current Status**: Phase 5 (Frontend & Decoupling) is complete. 
-**Next Objective**: Phase 6.1 (Event Bus with Kafka & MassTransit).
+**Current Status**: Phase 6.1 (Event Bus Foundation) is completed. 
+**Next Objective**: Phase 6.2 (Advanced Processing & Observability).
 
 [COMPLETED]: https://github.com/nhan/DarkGravity

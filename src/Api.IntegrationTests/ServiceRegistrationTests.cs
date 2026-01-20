@@ -19,7 +19,7 @@ public class ServiceRegistrationTests
         var configData = new Dictionary<string, string?>
         {
             ["ConnectionStrings:DefaultConnection"] = "Server=(localdb)\\mssqllocaldb;Database=TestDb;Trusted_Connection=True;",
-            ["DARKGRAVITY_DB_PASSWORD"] = "Placeholder123!",
+            ["DARKGRAVITY_DB_PASSWORD"] = "YOUR_PASSWORD",
             ["AllowedOrigins:0"] = "https://example.com"
         };
 
