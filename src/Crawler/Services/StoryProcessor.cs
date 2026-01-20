@@ -1,6 +1,7 @@
 using Shared.Data;
 using Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MassTransit;
 using DarkGravity.Contracts.Events;
 
@@ -16,12 +17,12 @@ public interface IStoryProcessor
 public class StoryProcessor : IStoryProcessor
 {
     private readonly AppDbContext _db;
-    private readonly ITopicProducer<StoryFetched> _producer;
+    private readonly IServiceProvider _serviceProvider;
 
-    public StoryProcessor(AppDbContext db, ITopicProducer<StoryFetched> producer)
+    public StoryProcessor(AppDbContext db, IServiceProvider serviceProvider)
     {
         _db = db;
-        _producer = producer;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task RepairDatabaseAsync()
@@ -68,10 +69,13 @@ public class StoryProcessor : IStoryProcessor
         {
             await _db.SaveChangesAsync();
 
+            // Resolve producer lazily to ensure Rider is started
+            var producer = _serviceProvider.GetRequiredService<ITopicProducer<StoryFetched>>();
+
             // Fire-and-forget events for the Analyzer
             foreach (var story in newStories)
             {
-                await _producer.Produce(new StoryFetched(
+                await producer.Produce(new StoryFetched(
                     story.Id,
                     story.Title,
                     story.BodyText,

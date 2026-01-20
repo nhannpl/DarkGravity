@@ -20,11 +20,14 @@ public static class ServiceCollectionExtensions
 
         if (!string.IsNullOrEmpty(dbPassword))
         {
-            var connectionBuilder = new SqlConnectionStringBuilder(connectionString)
-            {
-                Password = dbPassword
-            };
+            var connectionBuilder = new SqlConnectionStringBuilder(connectionString);
+            connectionBuilder.Password = dbPassword;
+            connectionBuilder.UserID = ConfigConstants.DefaultDbUser; // "sa"
+            connectionBuilder.TrustServerCertificate = true;
+            connectionBuilder.Encrypt = false;
             connectionString = connectionBuilder.ConnectionString;
+
+            Console.WriteLine($"DB Connection string updated with password from {ConfigConstants.DbPasswordKey}");
         }
 
         services.AddDbContext<AppDbContext>(options =>
@@ -44,26 +47,19 @@ public static class ServiceCollectionExtensions
         // MassTransit + Kafka
         services.AddMassTransit(x =>
         {
-            x.UsingInMemory((context, cfg) =>
-            {
-                cfg.ConfigureEndpoints(context);
-            });
-
             x.AddRider(rider =>
             {
                 rider.AddProducer<StoryFetched>(ConfigConstants.KafkaTopicStoryFetched);
 
                 rider.UsingKafka((context, k) =>
                 {
-                    k.Host(config[ConfigConstants.KafkaBootstrapServers] ?? "localhost:9092");
+                    k.Host(config[ConfigConstants.KafkaBootstrapServers] ?? "127.0.0.1:9092");
                 });
             });
 
-            // Outbox Pattern
-            x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+            x.UsingInMemory((context, cfg) =>
             {
-                o.UseSqlServer();
-                o.UseBusOutbox();
+                cfg.ConfigureEndpoints(context);
             });
         });
 
@@ -71,3 +67,7 @@ public static class ServiceCollectionExtensions
     }
 }
 
+public class DummyConsumer : IConsumer<StoryFetched>
+{
+    public Task Consume(ConsumeContext<StoryFetched> context) => Task.CompletedTask;
+}

@@ -21,10 +21,11 @@ public static class ServiceCollectionExtensions
 
         if (!string.IsNullOrEmpty(dbPassword))
         {
-            var connectionBuilder = new SqlConnectionStringBuilder(connectionString)
-            {
-                Password = dbPassword
-            };
+            var connectionBuilder = new SqlConnectionStringBuilder(connectionString);
+            connectionBuilder.Password = dbPassword;
+            connectionBuilder.UserID = ConfigConstants.DefaultDbUser; // "sa"
+            connectionBuilder.TrustServerCertificate = true;
+            connectionBuilder.Encrypt = false;
             connectionString = connectionBuilder.ConnectionString;
         }
 
@@ -38,8 +39,6 @@ public static class ServiceCollectionExtensions
         // MassTransit + Kafka
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<StoryFetchedConsumer>();
-
             x.UsingInMemory((context, cfg) =>
             {
                 cfg.ConfigureEndpoints(context);
@@ -48,13 +47,18 @@ public static class ServiceCollectionExtensions
             x.AddRider(rider =>
             {
                 rider.AddConsumer<StoryFetchedConsumer>();
+                rider.AddProducer<StoryFetched>(ConfigConstants.KafkaTopicStoryFetched);
 
                 rider.UsingKafka((context, k) =>
                 {
-                    k.Host(config[ConfigConstants.KafkaBootstrapServers] ?? "localhost:9092");
+                    k.Host(config[ConfigConstants.KafkaBootstrapServers] ?? "127.0.0.1:9092");
+                    k.ClientId = "darkgravity-analyzer";
 
-                    k.TopicConsumer<StoryFetched>(ConfigConstants.KafkaTopicStoryFetched, "analyzer-group", e =>
+                    k.TopicEndpoint<StoryFetched>(ConfigConstants.KafkaTopicStoryFetched, "analyzer-group", e =>
                     {
+                        // Ensure topic is created with at least 1 partition
+                        e.AutoOffsetReset = Confluent.Kafka.AutoOffsetReset.Earliest;
+
                         e.ConfigureConsumer<StoryFetchedConsumer>(context);
 
                         // Resiliency (Polly-like behavior built into MassTransit)

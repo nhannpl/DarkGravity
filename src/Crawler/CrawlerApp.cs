@@ -42,7 +42,7 @@ public class CrawlerApp : ICrawlerApp
             foreach (var sub in subreddits)
             {
                 Console.WriteLine($"--- Fetching from Reddit (r/{sub}) ---");
-                string redditUrl = $"https://www.reddit.com/r/{sub}/top.json?limit=2&t=day";
+                string redditUrl = $"https://www.reddit.com/r/{sub}/top.json?limit=10&t=week";
                 var redditStories = await _reddit.GetTopStoriesAsync(redditUrl);
                 Console.WriteLine($"Found {redditStories.Count} Reddit stories in r/{sub}.");
                 await _processor.ProcessAndSaveStoriesAsync(redditStories);
@@ -52,10 +52,13 @@ public class CrawlerApp : ICrawlerApp
             foreach (var query in ytQueries)
             {
                 Console.WriteLine($"\n--- Fetching from YouTube ({query}) ---");
-                var ytStories = await _youtube.GetStoriesFromChannelAsync(query, 2);
+                var ytStories = await _youtube.GetStoriesFromChannelAsync(query, 10);
                 Console.WriteLine($"Found {ytStories.Count} YouTube stories for '{query}'.");
                 await _processor.ProcessAndSaveStoriesAsync(ytStories);
             }
+
+            Console.WriteLine("\n⏳ Waiting for background tasks to finish...");
+            await Task.Delay(2000);
 
             Console.WriteLine("\n✅ Job Complete.");
 
