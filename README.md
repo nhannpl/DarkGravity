@@ -113,6 +113,16 @@ npm test -- --coverage --watch=false
 open coverage/index.html
 ```
 
+### 5. Maintenance & Troubleshooting
+
+#### 🔧 AI Analysis Migration
+If new AI providers are added or if stories were processed with "Mock Analysis" (due to missing keys), you can re-process them with the Migration Tool:
+
+```bash
+# Finds any 'MOCK ANALYSIS' stories and re-runs them with currently configured AI keys
+dotnet run --project src/Analyzer -- --migrate
+```
+
 ## 📖 Documentation
 - [Implementation Plan](implementation_plan.md) - The roadmap of the project.
 - [Secrets Management Guide](docs/SECRETS_MANAGEMENT.md) - How to configure API keys.
