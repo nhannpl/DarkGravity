@@ -14,7 +14,12 @@ import { MarkdownPipe } from '../../pipes/markdown.pipe';
   templateUrl: './story-reader.component.html',
   styleUrls: [
     './story-reader.component.css',
-    './story-reader-tts.css',
+    './styles/tts/tts-animations.css',
+    './styles/tts/tts-controls.css',
+    './styles/tts/tts-seeker.css',
+    './styles/tts/tts-settings.css',
+    './styles/tts/tts-highlight.css',
+    './styles/tts/tts-floating.css',
     './story-reader-analysis.css'
   ]
 })
@@ -172,8 +177,8 @@ export class StoryReaderComponent implements OnInit, OnDestroy {
 
   onVoiceChange(event: Event) {
     const select = event.target as HTMLSelectElement;
-    const voiceName = select.value;
-    const voice = this.tts.voices().find(v => v.name === voiceName);
+    const voiceUri = select.value;
+    const voice = this.tts.voices().find(v => v.voiceURI === voiceUri);
     if (voice) {
       this.tts.setVoice(voice);
     }

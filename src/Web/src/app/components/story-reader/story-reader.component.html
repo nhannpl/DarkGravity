@@ -64,15 +64,21 @@
         {{ getStorySource(story()!.url) === 'YOUTUBE' ? 'DECRYPTED TRANSCRIPT' : 'ARCHIVED STORY LOG' }}
         <span class="dropdown-arrow">{{ isTranscriptOpen() ? '▼' : '▶' }}</span>
       </div>
-<div class="tts-toolbar fade-in" *ngIf="isTranscriptOpen()">
-  <!-- Settings Panel -->
-  <div class="tts-settings glass">
+  <div class="tts-toolbar fade-in" *ngIf="isTranscriptOpen()">
+    <!-- Connectivity Notification -->
+    <div class="tts-alert glass fade-in" *ngIf="tts.connectionMessage()">
+      <span class="alert-icon">⚠</span>
+      {{ tts.connectionMessage() }}
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="tts-settings glass">
     <div class="setting-group grow">
       <label>VOICE MODULE</label>
       <select (change)="onVoiceChange($event)" class="voice-select">
-        <option *ngFor="let voice of tts.voices()" [value]="voice.name"
-          [selected]="voice.name === tts.selectedVoice()?.name">
-          {{ voice.name }}
+        <option *ngFor="let voice of tts.voices()" [value]="voice.voiceURI"
+          [selected]="voice.voiceURI === tts.selectedVoice()?.voiceURI">
+          {{ voice.name }}{{ voice.provider === 'cloud' ? ' (Internet Required)' : '' }}
         </option>
       </select>
     </div>
@@ -106,6 +112,9 @@
             (touchstart)="onSeekStart()" min="0" max="100" step="0.1">
           <div class="seeker-track">
             <div class="seeker-fill" [style.width.%]="tts.progress()"></div>
+          </div>
+          <div *ngIf="tts.isSynthesizing()" class="synthesizing-indicator">
+            <span class="pulse-dot"></span>
           </div>
           </div>
           <span class="time-display">{{ formatTime(tts.currentTime()) }} / {{ formatTime(tts.estimatedDuration()) }}</span>

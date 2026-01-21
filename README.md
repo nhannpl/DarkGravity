@@ -19,12 +19,13 @@ The repository is organized into a modular, decoupled architecture following **S
 *   **`src/Web`**: A high-end Angular 18+ application featuring glassmorphism, fluid animations, and a premium "void" aesthetic.
 *   **`infra/`**: Docker configuration for local infrastructure (SQL Server).
 
-## 🚀 Key Features
+##🚀 Key Features
 
 -   **Multi-Source Ingestion**: Automated crawling logic for Reddit JSON APIs and YouTube transcripts.
 -   **"Socrates" AI Engine**: Integrated with **Google Gemini**, **OpenAI (GPT-4o)**, **DeepSeek**, and **Mistral** via a failover strategy to ensure constant analysis availability. (See `StoryAnalyzer.cs`)
 -   **Automated Scoring**: AI-generated "Scary Scores" and qualitative analysis stored alongside raw story data for complex querying and sorting.
 -   **Premium Viewing Experience**: Responsive "Reader Mode" with optimized typography for maximum immersion.
+-   **High-Quality Text-to-Speech**: Google Cloud TTS integration with neural voices for accessible story narration. (See [TTS Setup Guide](docs/GOOGLE_CLOUD_TTS_SETUP.md))
 -   **Dockerized Infrastructure**: One-command setup for the local SQL Server database.
 
 ## 🛠️ Tech Stack
@@ -56,6 +57,9 @@ dotnet user-secrets set "GEMINI_API_KEY" "your_key" --project src/Analyzer
 # Set Database Password (Namespaced)
 dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Api
 dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'your_strong_password_here' --project src/Analyzer
+
+# Set Google Cloud TTS Key (API project)
+dotnet user-secrets set "GoogleCloud:TtsApiKey" "your_key" --project src/Api
 
 # View all configured secrets
 dotnet user-secrets list --project src/Analyzer

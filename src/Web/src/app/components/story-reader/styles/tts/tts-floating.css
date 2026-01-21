@@ -1,0 +1,99 @@
+/* TTS Floating Mini-Player & Pulse Indicator */
+
+.floating-player {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  padding: 0.75rem 1rem;
+  border-radius: 50px;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(var(--primary-glow-rgb, 98, 0, 234), 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: fadeUp 0.3s ease-out;
+}
+
+.float-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.fab-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--primary-glow);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fab-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(var(--primary-glow-rgb, 98, 0, 234), 0.4);
+  border-color: var(--primary-glow);
+}
+
+.fab-btn.stop-btn {
+  color: #ff3d00;
+  border-color: rgba(255, 61, 0, 0.3);
+}
+
+.fab-btn.stop-btn:hover {
+  background: rgba(255, 61, 0, 0.1);
+  box-shadow: 0 0 15px rgba(255, 61, 0, 0.4);
+}
+
+.mini-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 120px;
+}
+
+.mini-progress .time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-feature-settings: "tnum";
+}
+
+.mini-track {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mini-fill {
+  height: 100%;
+  background: var(--primary-glow);
+  box-shadow: 0 0 10px var(--primary-glow);
+  transition: width 0.1s linear;
+}
+
+.synthesizing-indicator {
+  position: absolute;
+  right: -25px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-primary, #9c27b0);
+  border-radius: 50%;
+  box-shadow: 0 0 0 rgba(156, 39, 176, 0.4);
+  animation: pulse-ring 1.5s infinite;
+}

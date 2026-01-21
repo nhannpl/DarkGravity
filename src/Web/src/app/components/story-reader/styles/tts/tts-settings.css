@@ -1,0 +1,130 @@
+/* TTS Voice & Rate Settings */
+
+.tts-toolbar {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tts-settings {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  border-left: 2px solid var(--primary-glow);
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 1rem;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.setting-group.grow {
+  flex: 1;
+  min-width: 200px;
+}
+
+.setting-group.shrink {
+  min-width: 150px;
+}
+
+.setting-group label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.voice-select {
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--accent-silver);
+  border: 1px solid var(--glass-border);
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.voice-select:focus {
+  border-color: var(--primary-glow);
+}
+
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  height: 30px;
+}
+
+.rate-slider {
+  width: 100%;
+  accent-color: var(--primary-glow);
+  cursor: pointer;
+  background: transparent;
+}
+
+.rate-number-input {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  width: 70px;
+  margin-left: 1rem;
+  text-align: center;
+  outline: none;
+  font-family: inherit;
+  cursor: text;
+  transition: all 0.2s ease;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.rate-number-input::-webkit-outer-spin-button,
+.rate-number-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.rate-number-input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--primary-glow);
+  box-shadow: 0 0 10px rgba(var(--primary-glow-rgb, 98, 0, 234), 0.5);
+  transform: scale(1.05);
+}
+
+.rate-number-input:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.tts-alert {
+  background: rgba(var(--primary-glow-rgb, 98, 0, 234), 0.1);
+  border: 1px solid rgba(var(--primary-glow-rgb, 98, 0, 234), 0.3);
+  color: var(--primary-glow);
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(5px);
+  animation: slideInUp 0.3s ease-out;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.alert-icon {
+  font-size: 1rem;
+  filter: drop-shadow(0 0 5px var(--primary-glow));
+}

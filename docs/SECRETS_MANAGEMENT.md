@@ -24,11 +24,12 @@ Used for AI Ingestion and analysis.
 
 
 ### 2. Project: API (`src/Api`)
-Used for serving the stories to the frontend.
+Used for serving the stories and synthesizing high-quality TTS.
 
-| Key | Purpose | Default (Local) |
+| Key | Service | Purpose |
 | :--- | :--- | :--- |
-| `DARKGRAVITY_DB_PASSWORD` | SQL Server `sa` password | *Mandatory (via .env)* |
+| `DARKGRAVITY_DB_PASSWORD` | SQL Server | Database authentication |
+| `GoogleCloud:TtsApiKey` | Google Cloud | Text-to-Speech synthesis |
 
 ---
 
@@ -80,6 +81,9 @@ dotnet user-secrets set "HUGGINGFACE_API_KEY" "..." --project src/Analyzer
 dotnet user-secrets set "OPENROUTER_API_KEY" "..." --project src/Analyzer
 dotnet user-secrets set "CLOUDFLARE_API_TOKEN" "..." --project src/Analyzer
 dotnet user-secrets set "CLOUDFLARE_ACCOUNT_ID" "..." --project src/Analyzer
+
+# Google Cloud Text-to-Speech
+dotnet user-secrets set "GoogleCloud:TtsApiKey" "your_key" --project src/Api
 ```
 
 ### 3. Remove a Secret
