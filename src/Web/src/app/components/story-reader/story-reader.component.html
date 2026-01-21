@@ -64,40 +64,71 @@
         {{ getStorySource(story()!.url) === 'YOUTUBE' ? 'DECRYPTED TRANSCRIPT' : 'ARCHIVED STORY LOG' }}
         <span class="dropdown-arrow">{{ isTranscriptOpen() ? '▼' : '▶' }}</span>
       </div>
-      <div class="tts-controls" *ngIf="isTranscriptOpen()">
-        <button *ngIf="!tts.isPlaying()" (click)="readStory()" class="tts-btn glass" title="Listen to Trace">
-          <span class="icon">▶</span> LISTEN TO TRACE
-        </button>
-      
-        <ng-container *ngIf="tts.isPlaying()">
-          <div class="control-group">
-            <button *ngIf="!tts.isPaused()" (click)="pauseStory()" class="tts-btn glass icon-only" title="Pause">
-              <span class="icon">⏸</span>
-            </button>
-            <button *ngIf="tts.isPaused()" (click)="resumeStory()" class="tts-btn glass icon-only" title="Resume">
-              <span class="icon">▶</span>
-            </button>
-      
-            <div class="tts-seeker-container">
-              <input type="range" class="tts-seeker" [value]="tts.progress()" (input)="onSeek($event)" min="0" max="100"
-                step="0.5">
-              <div class="seeker-track">
-                <div class="seeker-fill" [style.width.%]="tts.progress()"></div>
-              </div>
-            </div>
-      
-            <button (click)="stopStory()" class="tts-btn glass stop-btn icon-only" title="Stop">
-              <span class="icon">⏹</span>
-            </button>
-          </div>
-        </ng-container>
+<div class="tts-toolbar fade-in" *ngIf="isTranscriptOpen()">
+  <!-- Settings Panel -->
+  <div class="tts-settings glass">
+    <div class="setting-group grow">
+      <label>VOICE MODULE</label>
+      <select (change)="onVoiceChange($event)" class="voice-select">
+        <option *ngFor="let voice of tts.voices()" [value]="voice.name"
+          [selected]="voice.name === tts.selectedVoice()?.name">
+          {{ voice.name }}
+        </option>
+      </select>
+    </div>
+    <div class="setting-group shrink">
+      <label>Speech Speed</label>
+      <div class="slider-wrapper">
+        <input type="range" min="0.5" max="2.0" step="0.1" [value]="tts.rate()" (input)="onRateChange($event)"
+          class="rate-slider">
+        <input type="number" min="0.5" max="2.0" step="0.1" [value]="tts.rate()" (input)="onRateChange($event)"
+          class="rate-number-input">
       </div>
+    </div>
+  </div>
+
+  <div class="tts-controls">
+    <button *ngIf="!tts.isPlaying()" (click)="readStory()" class="tts-btn glass" title="Listen to Trace">
+      <span class="icon">▶</span> LISTEN TO TRACE
+    </button>
+
+    <ng-container *ngIf="tts.isPlaying()">
+      <div class="control-group">
+        <button *ngIf="!tts.isPaused()" (click)="pauseStory()" class="tts-btn glass icon-only" title="Pause">
+          <span class="icon">⏸</span>
+        </button>
+        <button *ngIf="tts.isPaused()" (click)="resumeStory()" class="tts-btn glass icon-only" title="Resume">
+          <span class="icon">▶</span>
+        </button>
+
+        <div class="tts-seeker-container">
+          <input type="range" class="tts-seeker" [value]="tts.progress()" (change)="onSeek($event)" (mousedown)="onSeekStart()"
+            (touchstart)="onSeekStart()" min="0" max="100" step="0.1">
+          <div class="seeker-track">
+            <div class="seeker-fill" [style.width.%]="tts.progress()"></div>
+          </div>
+          </div>
+          <span class="time-display">{{ formatTime(tts.currentTime()) }} / {{ formatTime(tts.estimatedDuration()) }}</span>
+          <button (click)="stopStory()" class="tts-btn glass stop-btn icon-only" title="Stop">
+            <span class="icon">⏹</span>
+          </button>
+          </div>
+          </ng-container>
+          </div>
+          </div>
     </div>
     
     <section class="story-body" *ngIf="isTranscriptOpen()">
-      <p class="paragraph" *ngFor="let para of story()!.bodyText.split('\n')">
-        {{ para }}
-      </p>
+      <div class="chunk-container">
+        <ng-container *ngFor="let chunk of tts.chunks(); let i = index">
+          <span class="chunk-span clickable-chunk" [class.active-chunk]="i === tts.currentChunkIndex()"
+            [innerHTML]="getHighlightedChunk(chunk, i)" (click)="skipToChunk(i)" title="Click to read from here"></span>
+          <!-- Insert a space after each chunk to prevent crowded text-->
+          <span class="chunk-spacer"> </span>
+          <!-- If the chunk ended in a newline, we verify if visual break is needed, 
+                                  but CSS white-space: pre-wrap handles it automatically if the newline is in the text -->
+        </ng-container>
+      </div>
     </section>
 
     <footer class="reader-footer">
@@ -110,4 +141,32 @@
     <p>The requested story transmission was lost in the void.</p>
     <a routerLink="/" class="back-link">RETURN TO FEED</a>
   </div>
+<!-- Floating Player -->
+<div class="floating-player glass" *ngIf="story() && isTranscriptOpen()">
+  <div class="float-controls">
+    <button *ngIf="!tts.isPlaying()" (click)="readStory()" class="fab-btn glass" title="Listen">
+      <span class="icon">▶</span>
+    </button>
+
+    <ng-container *ngIf="tts.isPlaying()">
+      <button *ngIf="!tts.isPaused()" (click)="pauseStory()" class="fab-btn glass" title="Pause">
+        <span class="icon">⏸</span>
+      </button>
+      <button *ngIf="tts.isPaused()" (click)="resumeStory()" class="fab-btn glass" title="Resume">
+        <span class="icon">▶</span>
+      </button>
+
+      <div class="mini-progress">
+        <span class="time">{{ formatTime(tts.currentTime()) }}</span>
+        <div class="mini-track">
+          <div class="mini-fill" [style.width.%]="tts.progress()"></div>
+        </div>
+      </div>
+
+      <button (click)="stopStory()" class="fab-btn glass stop-btn" title="Stop">
+        <span class="icon">⏹</span>
+      </button>
+    </ng-container>
+  </div>
+</div>
 </div>

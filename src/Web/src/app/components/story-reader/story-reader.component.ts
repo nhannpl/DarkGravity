@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -12,13 +12,44 @@ import { MarkdownPipe } from '../../pipes/markdown.pipe';
   standalone: true,
   imports: [CommonModule, RouterLink, MarkdownPipe],
   templateUrl: './story-reader.component.html',
-  styleUrl: './story-reader.component.css'
+  styleUrls: [
+    './story-reader.component.css',
+    './story-reader-tts.css',
+    './story-reader-analysis.css'
+  ]
 })
 export class StoryReaderComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private storyService = inject(StoryService);
   private sanitizer = inject(DomSanitizer);
+  private el = inject(ElementRef);
   public tts = inject(TtsService);
+
+  constructor() {
+    effect(() => {
+      const index = this.tts.currentChunkIndex();
+      // Only auto-scroll if playing to avoid annoying jumps when just exploring
+      if (this.tts.isPlaying() && !this.tts.isPaused()) {
+        setTimeout(() => this.scrollToActiveChunk(), 100);
+      }
+    });
+  }
+
+  private scrollToActiveChunk() {
+    const activeEl = this.el.nativeElement.querySelector('.active-chunk');
+    if (!activeEl) return;
+
+    const rect = activeEl.getBoundingClientRect();
+    const isInViewport = (
+      rect.top >= 100 && // Add some buffer for header
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+    );
+
+    if (!isInViewport) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
 
   story = signal<Story | null>(null);
   loading = signal<boolean>(true);
@@ -45,6 +76,9 @@ export class StoryReaderComponent implements OnInit, OnDestroy {
           // Auto-open if it's a Reddit story (no video), close if it's YouTube
           const isYoutube = data.url.includes('youtube.com') || data.url.includes('youtu.be');
           this.isTranscriptOpen.set(!isYoutube);
+
+          // Pre-load text into TTS for chunking display
+          this.tts.loadText(data.bodyText);
         },
         error: (err) => {
           console.error('Failed to transmit story:', err);
@@ -54,6 +88,28 @@ export class StoryReaderComponent implements OnInit, OnDestroy {
     } else {
       this.loading.set(false);
     }
+  }
+
+  getHighlightedChunk(chunk: string, index: number): string {
+    const isCurrent = index === this.tts.currentChunkIndex();
+    const charIndex = this.tts.activeCharIndex();
+
+    if (!isCurrent || charIndex === -1) {
+      return chunk;
+    }
+
+    // Simple word finding logic starting at charIndex
+    const before = chunk.substring(0, charIndex);
+    const remainder = chunk.substring(charIndex);
+    const wordMatch = remainder.match(/^(\S+)(.*)/s); // Word then rest
+
+    if (wordMatch) {
+      const word = wordMatch[1];
+      const after = wordMatch[2];
+      return `${before}<span class="word-highlight">${word}</span>${after}`;
+    }
+
+    return chunk;
   }
 
   toggleTranscript() {
@@ -97,10 +153,51 @@ export class StoryReaderComponent implements OnInit, OnDestroy {
     this.tts.stop();
   }
 
+  private wasPlayingBeforeDrag = false;
+
+  onSeekStart() {
+    this.wasPlayingBeforeDrag = !this.tts.isPaused() && this.tts.isPlaying();
+    if (this.wasPlayingBeforeDrag) {
+      this.tts.pause();
+    }
+  }
+
   onSeek(event: Event) {
     const target = event.target as HTMLInputElement;
     const value = parseFloat(target.value);
-    this.tts.seek(value);
+
+    // Pass the state to seek, let the service handle the resume/delay logic
+    this.tts.seek(value, this.wasPlayingBeforeDrag);
+  }
+
+  onVoiceChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const voiceName = select.value;
+    const voice = this.tts.voices().find(v => v.name === voiceName);
+    if (voice) {
+      this.tts.setVoice(voice);
+    }
+  }
+
+  skipToChunk(index: number) {
+    this.tts.playFromChunk(index);
+  }
+
+  onRateChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let rate = parseFloat(input.value);
+    // Clamp value
+    if (rate < 0.5) rate = 0.5;
+    if (rate > 2.0) rate = 2.0;
+
+    this.tts.setRate(rate);
+  }
+
+  formatTime(seconds: number): string {
+    if (!seconds || isNaN(seconds)) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 
   ngOnDestroy(): void {

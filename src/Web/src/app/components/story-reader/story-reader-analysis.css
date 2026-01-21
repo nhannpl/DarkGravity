@@ -1,0 +1,151 @@
+.metadata-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.separator {
+  opacity: 0.3;
+}
+
+.scary-tag {
+  letter-spacing: 0.1em;
+}
+
+.scary-tag[data-level="ELDRIITCH"] {
+  color: #ff3d00;
+}
+
+.scary-tag[data-level="UNSETTLING"] {
+  color: #ffab00;
+}
+
+.scary-tag[data-level="EERIE"] {
+  color: #00e5ff;
+}
+
+.source-link {
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.source-link:hover {
+  opacity: 0.8;
+}
+
+.source-tag {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.source-tag[data-source="YOUTUBE"] {
+  color: #ff0000;
+  border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.source-tag[data-source="REDDIT"] {
+  color: #ff4500;
+  border: 1px solid rgba(255, 69, 0, 0.2);
+}
+
+.source-tag[data-source="VOID"] {
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* AI Analysis Box */
+.ai-analysis-box {
+  padding: 1.5rem;
+  margin-bottom: 3rem;
+  border-left: 4px solid var(--primary-glow);
+  background: rgba(98, 0, 234, 0.03);
+}
+
+.analysis-header {
+  font-size: 0.7rem;
+  letter-spacing: 0.2rem;
+  color: var(--primary-glow);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analysis-text {
+  font-size: 0.95rem;
+  color: var(--accent-silver);
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+::ng-deep .analysis-text h1,
+::ng-deep .analysis-text h2,
+::ng-deep .analysis-text h3 {
+  color: var(--primary-glow);
+  font-size: 1.1rem;
+  margin: 1.5rem 0 0.5rem 0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+::ng-deep .analysis-text p {
+  margin-bottom: 1rem;
+}
+
+::ng-deep .analysis-text strong {
+  color: var(--accent-silver);
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+::ng-deep .analysis-text ul,
+::ng-deep .analysis-text ol {
+  margin: 0.5rem 0 1rem 1.5rem;
+}
+
+::ng-deep .analysis-text li {
+  margin-bottom: 0.5rem;
+}
+
+.score-grid {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.score-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.score-item .label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+.score-item .value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-glow);
+}
+
+.score-bar-container {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.score-bar {
+  height: 100%;
+  background: var(--primary-glow);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
