@@ -13,7 +13,7 @@
     top: 0;
     display: flex;
     flex-direction: column;
-    padding: 2rem;
+    padding: 1.5rem;
     z-index: 100;
     border-radius: 0;
     border-left: none;
@@ -26,8 +26,8 @@
 }
 
 .logo-text {
-    font-size: 1.25rem;
-    letter-spacing: 0.3em;
+    font-size: 1.1rem;
+        letter-spacing: 0.25em;
     color: var(--accent-silver);
     text-shadow: 0 0 15px rgba(98, 0, 234, 0.4);
 }
@@ -96,13 +96,17 @@
     border-radius: 20px;
 }
 
+.search-bar {
+    flex: 1;
+    margin-right: 2rem;
+}
 .search-input {
     background: transparent;
     border: none;
     color: var(--accent-silver);
     font-family: inherit;
     font-size: 0.9rem;
-    width: 300px;
+    width: 100%;
     outline: none;
 }
 

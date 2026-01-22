@@ -55,7 +55,6 @@ export class StoryReaderComponent implements OnInit, OnDestroy {
     }
   }
 
-
   story = signal<Story | null>(null);
   loading = signal<boolean>(true);
   isTranscriptOpen = signal<boolean>(false);
