@@ -33,6 +33,7 @@ export class StoryFeedComponent implements OnInit {
                 sortBy: this.searchService.sortBy(),
                 sortOrder: this.searchService.sortOrder(),
                 minScaryScore: this.searchService.minScaryScore(),
+                platform: this.searchService.platform(),
                 page: this.searchService.page(),
                 pageSize: this.searchService.pageSize()
             };
@@ -59,6 +60,11 @@ export class StoryFeedComponent implements OnInit {
     onScaryScoreChange(event: Event) {
         const value = (event.target as HTMLInputElement).value;
         this.searchService.setMinScaryScore(Number(value));
+    }
+
+    onPlatformChange(event: Event) {
+        const value = (event.target as HTMLSelectElement).value;
+        this.searchService.setPlatform(value);
     }
 
     onPageChange(page: number) {

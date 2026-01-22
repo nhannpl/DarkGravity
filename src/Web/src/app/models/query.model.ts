@@ -3,6 +3,7 @@ export interface StoryQueryParameters {
   minScaryScore?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  platform?: string;
   page?: number;
   pageSize?: number;
 }

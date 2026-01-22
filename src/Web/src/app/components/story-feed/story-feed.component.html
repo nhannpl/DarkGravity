@@ -18,7 +18,18 @@
                 <span class="select-arrow">▾</span>
             </div>
         </div>
-    
+
+        <div class="filter-group">
+            <label for="platform-select">Platform</label>
+            <div class="select-wrapper">
+                <select id="platform-select" (change)="onPlatformChange($event)" class="filter-select">
+                    <option value="">All Sources</option>
+                    <option value="reddit">Reddit</option>
+                    <option value="youtube">YouTube</option>
+                </select>
+                <span class="select-arrow">▾</span>
+            </div>
+        </div>
         <div class="filter-group">
             <div class="filter-label-row">
                 <label for="scary-range">Scary Score</label>

@@ -35,6 +35,19 @@ public class StoriesController : ControllerBase
             query = query.Where(s => s.ScaryScore >= @params.MinScaryScore.Value);
         }
 
+        if (!string.IsNullOrWhiteSpace(@params.Platform))
+        {
+            var platform = @params.Platform.ToLower();
+            if (platform == "youtube")
+            {
+                query = query.Where(s => s.Url.Contains("youtube.com") || s.Url.Contains("youtu.be"));
+            }
+            else if (platform == "reddit")
+            {
+                query = query.Where(s => s.Url.Contains("reddit.com"));
+            }
+        }
+
         // Sorting
         query = @params.SortBy switch
         {

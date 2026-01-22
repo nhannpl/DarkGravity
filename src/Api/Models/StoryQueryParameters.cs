@@ -14,6 +14,8 @@ public class StoryQueryParameters
     [Range(0, 10)]
     public double? MinScaryScore { get; set; }
 
+    public string? Platform { get; set; }
+
     public string? SortBy { get; set; } = StorySortFields.Upvotes;
 
     public string? SortOrder { get; set; } = SortOrders.Descending;
