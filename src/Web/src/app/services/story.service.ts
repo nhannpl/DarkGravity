@@ -13,6 +13,7 @@ export class StoryService {
 
   stories = signal<Story[]>([]);
   totalCount = signal<number>(0);
+  totalPages = signal<number>(0);
   loading = signal<boolean>(false);
 
   getStories(params?: StoryQueryParameters): Observable<PagedResult<Story>> {
@@ -32,6 +33,8 @@ export class StoryService {
       tap(result => {
         this.stories.set(result.items);
         this.totalCount.set(result.totalCount);
+        const total = result.totalPages || Math.ceil(result.totalCount / (params?.pageSize || 50));
+        this.totalPages.set(total);
         this.loading.set(false);
       })
     );

@@ -44,52 +44,65 @@
         <p>No transmissions match your current filters.</p>
     </div>
 
-    <div *ngIf="!loading() && stories().length > 0" class="story-grid">
-        <article *ngFor="let story of stories(); let i = index" class="story-card glass fade-in"
-            [style.animation-delay]="i * 0.1 + 's'" [routerLink]="['/story', story.id]">
+    <div *ngIf="!loading() && stories().length > 0">
+        <!-- Top Pagination -->
+        <app-pagination [currentPage]="searchService.page()" [totalPages]="totalPages()"
+            [pageSize]="searchService.pageSize()" (pageChange)="onPageChange($event)"
+            (pageSizeChange)="onPageSizeChange($event)" class="pagination-top">
+        </app-pagination>
+    
+        <div class="story-grid">
+            <article *ngFor="let story of stories(); let i = index" class="story-card glass fade-in"
+                [style.animation-delay]="i * 0.1 + 's'" [routerLink]="['/story', story.id]">
 
-            <div class="card-glow"></div>
+                <div class="card-glow"></div>
 
-            <div class="card-content">
-                <div class="card-header">
-                    <div class="header-tags">
-                        <span class="scary-tag" [attr.data-level]="getScaryLevel(story.scaryScore)">
-                            {{ getScaryLevel(story.scaryScore) }}
-                        </span>
-                        <a [href]="story.url" target="_blank" class="source-link" (click)="$event.stopPropagation()">
-                            <span class="source-tag" [attr.data-source]="getStorySource(story.url)">
-                                {{ getStorySource(story.url) }} ↗
+                <div class="card-content">
+                    <div class="card-header">
+                        <div class="header-tags">
+                            <span class="scary-tag" [attr.data-level]="getScaryLevel(story.scaryScore)">
+                                {{ getScaryLevel(story.scaryScore) }}
                             </span>
-                        </a>
+                            <a [href]="story.url" target="_blank" class="source-link" (click)="$event.stopPropagation()">
+                                <span class="source-tag" [attr.data-source]="getStorySource(story.url)">
+                                    {{ getStorySource(story.url) }} ↗
+                                </span>
+                            </a>
                         </div>
-                    <span class="story-date">{{ story.fetchedAt | date:'MMM d' }}</span>
-                </div>
-
-                <h3 class="story-title">{{ story.title }}</h3>
-
-                <p class="story-excerpt">
-                    {{ story.bodyText | slice:0:150 }}...
-                </p>
-
-                <div class="card-footer">
-                    <div class="score-indicator">
-                        <div class="score-label">Anomaly level</div>
-                        <div class="score-bar-bg">
-                            <div class="score-bar-fill" [style.width.%]="story.scaryScore * 10"></div>
+                        <span class="story-date">{{ story.fetchedAt | date:'MMM d' }}</span>
                         </div>
-                        <div class="score-value">{{ story.scaryScore }}/10</div>
-                    </div>
 
-                    <div class="card-actions">
-                        <button class="read-btn" [routerLink]="['/story', story.id]">
-                            READ TRACE
-                        </button>
-                        <a [href]="story.url" target="_blank" class="original-link" (click)="$event.stopPropagation()">
-                            ORIGINAL POST ↗
-                        </a>
+                    <h3 class="story-title">{{ story.title }}</h3>
+
+                    <p class="story-excerpt">
+                        {{ story.bodyText | slice:0:150 }}...
+                    </p>
+
+                    <div class="card-footer">
+                        <div class="score-indicator">
+                            <div class="score-label">Anomaly level</div>
+                            <div class="score-bar-bg">
+                                <div class="score-bar-fill" [style.width.%]="story.scaryScore * 10"></div>
+                            </div>
+                            <div class="score-value">{{ story.scaryScore }}/10</div>
                         </div>
-                </div>
-            </div>
-        </article>
+
+                        <div class="card-actions">
+                            <button class="read-btn" [routerLink]="['/story', story.id]">
+                                READ TRACE
+                            </button>
+                            <a [href]="story.url" target="_blank" class="original-link" (click)="$event.stopPropagation()">
+                                ORIGINAL POST ↗
+                            </a>
+                        </div>
+                        </div>
+                        </div>
+                        </article>
+        </div>
+        
+        <!-- Pagination -->
+        <app-pagination [currentPage]="searchService.page()" [totalPages]="totalPages()" [pageSize]="searchService.pageSize()"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)">
+        </app-pagination>
     </div>
 </div>

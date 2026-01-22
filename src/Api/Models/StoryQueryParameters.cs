@@ -5,7 +5,7 @@ namespace Api.Models;
 
 public class StoryQueryParameters
 {
-    private const int MaxPageSize = 100;
+    private const int MaxPageSize = 200;
     private const int MaxSearchTermLength = 200;
 
     [MaxLength(MaxSearchTermLength)]

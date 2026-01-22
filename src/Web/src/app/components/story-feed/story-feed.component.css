@@ -394,3 +394,6 @@
     color: var(--accent-silver);
     margin-bottom: 0.5rem;
 }
+app-pagination.pagination-top {
+    margin: 1rem 0 2rem 0;
+}
