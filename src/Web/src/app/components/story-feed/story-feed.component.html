@@ -33,14 +33,22 @@
         <div class="filter-group">
             <div class="filter-label-row">
                 <label for="scary-range">Scary Score</label>
-                <span class="range-value">{{ searchService.minScaryScore() }}+</span>
+                <span class="range-value">{{ searchService.minScaryScore() }} - {{ searchService.maxScaryScore() }}</span>
             </div>
-            <input type="range" id="scary-range" min="0" max="10" step="1" [value]="searchService.minScaryScore()"
-                (input)="onScaryScoreChange($event)" class="filter-range">
+            <div class="range-input-container">
+                <div class="range-track" [style.background]="getTrackGradient()"></div>
+                <!-- Min Slider -->
+                <input type="range" min="0" max="10" step="1" [value]="searchService.minScaryScore()"
+                    (input)="onMinScaryScoreChange($event)" class="filter-range dual-range min-range">
+            
+                <!-- Max Slider -->
+                <input type="range" min="0" max="10" step="1" [value]="searchService.maxScaryScore()"
+                    (input)="onMaxScaryScoreChange($event)" class="filter-range dual-range max-range">
+            </div>
         </div>
     
         <div class="filter-stats">
-            <span class="stat-count">{{ stories().length }}</span>
+            <span class="stat-count">{{ totalCount() }}</span>
             <span class="stat-label">Results</span>
         </div>
     </div>

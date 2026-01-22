@@ -93,16 +93,41 @@
 }
 
 /* Range Input Styling */
-.filter-range {
-    appearance: none;
+/* Range Input Styling */
+.range-input-container {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.range-track {
+    position: absolute;
     width: 100%;
     height: 4px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 2px;
-    outline: none;
+    z-index: 1;
+    }
+    
+    .filter-range {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 100%;
+        position: absolute;
+        left: 0;
+        background: transparent;
+        /* Make track transparent so we see the custom track */
+        pointer-events: none;
+        /* Allow clicks to pass through */
+        z-index: 2;
+        margin: 0;
+        /* Remove default margin */
 }
 
 .filter-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
     appearance: none;
     width: 16px;
     height: 16px;
@@ -110,13 +135,60 @@
     border-radius: 50%;
     cursor: pointer;
     box-shadow: 0 0 10px var(--primary-glow);
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+        pointer-events: auto;
+        /* Re-enable clicks on thumb */
+        border: 2px solid var(--bg-void);
+        /* Contrast with track */
+        margin-top: -6px;
+        /* Center veritcally if needed context dependent, but with absolute positioning might not need */
+    }
+    
+    /* Firefox support */
+    .filter-range::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: var(--primary-glow);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 0 10px var(--primary-glow);
+        pointer-events: auto;
+        border: 2px solid var(--bg-void);
+    }
+    
+    .filter-range:focus {
+        outline: none;
+    }
+    
+    .filter-range::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        /* Hide default track */
+        cursor: pointer;
+    }
+    
+    .filter-range::-moz-range-track {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        cursor: pointer;
 }
 
 .filter-range::-webkit-slider-thumb:hover {
     transform: scale(1.2);
+    box-shadow: 0 0 15px var(--primary-glow);
+        z-index: 3;
 }
 
+/* Ensure sliders stack correctly */
+.min-range {
+    z-index: 3;
+}
+
+.max-range {
+    z-index: 4;
+}
 .filter-stats {
     margin-left: auto;
     display: flex;

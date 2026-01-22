@@ -35,6 +35,11 @@ public class StoriesController : ControllerBase
             query = query.Where(s => s.ScaryScore >= @params.MinScaryScore.Value);
         }
 
+        if (@params.MaxScaryScore.HasValue)
+        {
+            query = query.Where(s => s.ScaryScore <= @params.MaxScaryScore.Value);
+        }
+
         if (!string.IsNullOrWhiteSpace(@params.Platform))
         {
             var platform = @params.Platform.ToLower();

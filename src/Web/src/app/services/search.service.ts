@@ -9,6 +9,7 @@ export class SearchService {
   sortBy = signal<string>(StorySortFields.Upvotes);
   sortOrder = signal<'asc' | 'desc'>(SortOrders.Descending);
   minScaryScore = signal<number>(0);
+  maxScaryScore = signal<number>(10);
   platform = signal<string>('');
   page = signal<number>(1);
   pageSize = signal<number>(50);
@@ -24,8 +25,9 @@ export class SearchService {
     this.page.set(1);
   }
 
-  setMinScaryScore(score: number) {
-    this.minScaryScore.set(score);
+  setScaryScoreRange(min: number, max: number) {
+    this.minScaryScore.set(min);
+    this.maxScaryScore.set(max);
     this.page.set(1);
   }
 

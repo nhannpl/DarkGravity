@@ -24,6 +24,7 @@ export class StoryFeedComponent implements OnInit {
     stories = this.storyService.stories;
     loading = this.storyService.loading;
     totalPages = this.storyService.totalPages;
+    totalCount = this.storyService.totalCount;
 
     constructor() {
         // Automatically fetch stories when search/filter/sort parameters change
@@ -33,6 +34,7 @@ export class StoryFeedComponent implements OnInit {
                 sortBy: this.searchService.sortBy(),
                 sortOrder: this.searchService.sortOrder(),
                 minScaryScore: this.searchService.minScaryScore(),
+                maxScaryScore: this.searchService.maxScaryScore(),
                 platform: this.searchService.platform(),
                 page: this.searchService.page(),
                 pageSize: this.searchService.pageSize()
@@ -57,9 +59,30 @@ export class StoryFeedComponent implements OnInit {
         this.searchService.setSort(field, order as 'asc' | 'desc');
     }
 
-    onScaryScoreChange(event: Event) {
-        const value = (event.target as HTMLInputElement).value;
-        this.searchService.setMinScaryScore(Number(value));
+    updateScaryScore(min: number | null, max: number | null) {
+        const currentMin = this.searchService.minScaryScore();
+        const currentMax = this.searchService.maxScaryScore();
+
+        let newMin = min !== null ? min : currentMin;
+        let newMax = max !== null ? max : currentMax;
+
+        // Ensure min <= max
+        if (newMin > newMax) {
+            if (min !== null) newMax = newMin; // if moving min past max, push max
+            else newMin = newMax; // if moving max past min, push min (shouldn't happen with correct UI constraints but good safety)
+        }
+
+        this.searchService.setScaryScoreRange(newMin, newMax);
+    }
+
+    onMinScaryScoreChange(event: Event) {
+        const value = Number((event.target as HTMLInputElement).value);
+        this.updateScaryScore(value, null);
+    }
+
+    onMaxScaryScoreChange(event: Event) {
+        const value = Number((event.target as HTMLInputElement).value);
+        this.updateScaryScore(null, value);
     }
 
     onPlatformChange(event: Event) {
@@ -88,5 +111,20 @@ export class StoryFeedComponent implements OnInit {
         if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YOUTUBE';
         if (url.includes('reddit.com')) return 'REDDIT';
         return 'VOID';
+    }
+
+    getTrackGradient(): string {
+        const min = this.searchService.minScaryScore();
+        const max = this.searchService.maxScaryScore();
+        const minPercent = (min / 10) * 100;
+        const maxPercent = (max / 10) * 100;
+
+        return `linear-gradient(to right, 
+            rgba(255, 255, 255, 0.1) 0%, 
+            rgba(255, 255, 255, 0.1) ${minPercent}%, 
+            rgba(124, 77, 255, 0.8) ${minPercent}%, 
+            rgba(124, 77, 255, 0.8) ${maxPercent}%, 
+            rgba(255, 255, 255, 0.1) ${maxPercent}%, 
+            rgba(255, 255, 255, 0.1) 100%)`;
     }
 }
