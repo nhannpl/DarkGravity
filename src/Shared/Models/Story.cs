@@ -11,5 +11,6 @@ public class Story
     public string AiAnalysis { get; set; } = string.Empty; // New AI Field
     public double? ScaryScore { get; set; } // New Parsed Score
     public int Upvotes { get; set; }
+    public int ShareCount { get; set; } = 0;
     public DateTime FetchedAt { get; set; } = DateTime.UtcNow;
 }
