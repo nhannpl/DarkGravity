@@ -176,12 +176,139 @@
     }
 }
 
-@media (max-width: 768px) {
+/* Header Layout */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+/* Hamburger Button */
+.menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 1001;
+    transition: transform 0.3s ease;
+}
+
+.hamburger-box {
+    width: 24px;
+    height: 18px;
+    display: inline-block;
+    position: relative;
+}
+
+.hamburger-inner {
+    width: 100%;
+    height: 2px;
+    background-color: var(--accent-silver);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+}
+
+.hamburger-inner::before,
+.hamburger-inner::after {
+    content: "";
+    width: 100%;
+    height: 2px;
+    background-color: var(--accent-silver);
+    position: absolute;
+    left: 0;
+    transition: all 0.3s ease;
+}
+
+.hamburger-inner::before {
+    top: -8px;
+}
+
+.hamburger-inner::after {
+    top: 8px;
+}
+
+.hamburger-inner.active {
+    background-color: transparent;
+}
+
+.hamburger-inner.active::before {
+    top: 0;
+    transform: rotate(45deg);
+}
+
+.hamburger-inner.active::after {
+    top: 0;
+    transform: rotate(-45deg);
+}
+
+/* Sidebar Backdrop */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.sidebar-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (max-width: 1024px) {
+    .menu-toggle {
+        display: block;
+    }
     .sidebar {
-        display: none;
+        transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        
+        .sidebar-backdrop {
+            display: block;
     }
 
     .main-content {
         margin-left: 0;
+    }
+.top-header {
+    margin: 1rem;
+    padding: 0 1.5rem;
+}
+}
+
+@media (max-width: 640px) {
+    .logo-text {
+        font-size: 0.9rem;
+    }
+
+    .nav-label {
+        font-size: 0.9rem;
+    }
+
+    .top-header {
+        margin: 0.5rem;
+        border-radius: 12px;
+    }
+
+    .content-area {
+        padding: 1rem;
     }
 }
