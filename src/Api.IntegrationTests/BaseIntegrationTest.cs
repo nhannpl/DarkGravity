@@ -9,9 +9,7 @@ namespace Api.IntegrationTests;
 
 public abstract class BaseIntegrationTest : IAsyncLifetime
 {
-    private readonly MsSqlContainer _dbContainer = new MsSqlBuilder()
-        .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
-        .Build();
+    private MsSqlContainer _dbContainer = null!;
 
     protected HttpClient Client { get; private set; } = null!;
     protected IServiceScope Scope { get; private set; } = null!;
@@ -19,6 +17,9 @@ public abstract class BaseIntegrationTest : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        _dbContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04")
+            .Build();
+
         await _dbContainer.StartAsync();
 
         var factory = new WebApplicationFactory<Program>()
