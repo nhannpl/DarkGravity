@@ -56,6 +56,9 @@ public static class ServiceCollectionExtensions
             });
         });
 
+        // TTS Service
+        services.AddScoped<Api.Services.ITtsService, Api.Services.GoogleTtsService>();
+
         return services;
     }
 }
