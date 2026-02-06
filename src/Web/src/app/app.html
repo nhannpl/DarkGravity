@@ -1,6 +1,9 @@
 <div class="layout-wrapper">
+  <!-- Backdrop for mobile menu -->
+  <div class="sidebar-backdrop" [class.show]="isMenuOpen()" (click)="toggleMenu()"></div>
+
   <!-- Sidebar -->
-  <aside class="sidebar glass">
+  <aside class="sidebar glass" [class.open]="isMenuOpen()">
     <div class="logo-container">
       <div class="logo-glow"></div>
       <h1 class="logo-text">DARK GRAVITY</h1>
@@ -28,8 +31,15 @@
   <!-- Main Content -->
   <main class="main-content">
     <header class="top-header glass">
-      <div class="search-bar">
-        <input type="text" placeholder="Search the void..." class="search-input" (input)="onSearch($event)">
+      <div class="header-left">
+        <button class="menu-toggle" (click)="toggleMenu()" aria-label="Toggle Menu">
+          <div class="hamburger-box">
+            <div class="hamburger-inner" [class.active]="isMenuOpen()"></div>
+          </div>
+        </button>
+        <div class="search-bar">
+          <input type="text" placeholder="Search the void..." class="search-input" (input)="onSearch($event)">
+        </div>
       </div>
       <div class="user-profile">
         <div class="user-avatar glass">N</div>

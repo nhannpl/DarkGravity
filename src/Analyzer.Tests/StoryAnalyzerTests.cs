@@ -78,6 +78,9 @@ public class StoryAnalyzerTests : IDisposable
     [InlineData("This is scary. Score: 8.5/10", 8.5)]
     [InlineData("Spooky! score: 7", 7.0)]
     [InlineData("Terrifying! 9.2/10", 9.2)]
+    [InlineData("Scary Score: 4 (but maybe more)", 4.0)]
+    [InlineData("Something went wrong. Error: Quota exceeded", null)]
+    [InlineData("The score is 11", null)] // Should be <= 10
     [InlineData("No score here.", null)]
     public async Task AnalyzeAsync_CorrectlyParsesVariousScoreFormats(string aiResponse, double? expectedScore)
     {
@@ -213,5 +216,49 @@ public class StoryAnalyzerTests : IDisposable
 
         // Assert
         Assert.Contains("MOCK ANALYSIS", result.Analysis);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_UsesMistral_WhenKeyIsPresent()
+    {
+        // Arrange
+        _config.Setup(c => c["MISTRAL_API_KEY"]).Returns("fake_mistral_key");
+        var analyzer = new StoryAnalyzer(_client, _config.Object);
+        var story = new Story { Title = "T", BodyText = "B" };
+        var mistralResponse = @"{ ""choices"": [ { ""message"": { ""content"": ""Mistral Analysis. Score: 8"" } } ] }";
+        _handler.SetupRequest(HttpMethod.Post, r => r.RequestUri!.ToString().Contains("mistral"))
+                .ReturnsResponse(mistralResponse, "application/json");
+
+        // Act
+        var result = await analyzer.AnalyzeAsync(story);
+
+        // Assert
+        Assert.Equal(8.0, result.Score);
+        Assert.Contains("Mistral", result.Analysis);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_UsesOpenRouter_WhenKeyIsPresent()
+    {
+        // Arrange
+        _config.Setup(c => c["GEMINI_API_KEY"]).Returns((string?)null);
+        _config.Setup(c => c["DEEPSEEK_API_KEY"]).Returns((string?)null);
+        _config.Setup(c => c["MISTRAL_API_KEY"]).Returns((string?)null);
+        _config.Setup(c => c["CLOUDF_API_TOKEN"]).Returns((string?)null);
+        _config.Setup(c => c["HUGGINGFACE_API_KEY"]).Returns((string?)null);
+        _config.Setup(c => c["OPENROUTER_API_KEY"]).Returns("fake_or_key");
+
+        var analyzer = new StoryAnalyzer(_client, _config.Object);
+        var story = new Story { Title = "T", BodyText = "B" };
+        var orResponse = @"{ ""choices"": [ { ""message"": { ""content"": ""OpenRouter Analysis. Score: 3"" } } ] }";
+        _handler.SetupRequest(HttpMethod.Post, r => r.RequestUri!.ToString().Contains("openrouter"))
+                .ReturnsResponse(orResponse, "application/json");
+
+        // Act
+        var result = await analyzer.AnalyzeAsync(story);
+
+        // Assert
+        Assert.Equal(3.0, result.Score);
+        Assert.Contains("OpenRouter", result.Analysis);
     }
 }

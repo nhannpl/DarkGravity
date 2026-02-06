@@ -11,16 +11,22 @@ import { filter } from 'rxjs';
 })
 export class App {
   protected readonly title = signal('dark-gravity-web');
+  protected readonly isMenuOpen = signal(false);
   private searchService = inject(SearchService);
   private router = inject(Router);
 
   constructor() {
-    // Scroll to top on navigation
+    // Scroll to top on navigation and close menu
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       window.scrollTo(0, 0);
+      this.isMenuOpen.set(false);
     });
+  }
+
+  toggleMenu() {
+    this.isMenuOpen.update(open => !open);
   }
 
   onSearch(event: Event) {

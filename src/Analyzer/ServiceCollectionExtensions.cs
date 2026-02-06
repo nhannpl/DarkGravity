@@ -35,6 +35,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient();
 
         services.AddScoped<IStoryAnalyzer, StoryAnalyzer>();
+        services.AddScoped<MigrationService>();
 
         // MassTransit + Kafka
         services.AddMassTransit(x =>

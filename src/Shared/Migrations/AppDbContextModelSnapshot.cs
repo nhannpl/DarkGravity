@@ -220,6 +220,9 @@ namespace Shared.Migrations
                     b.Property<double?>("ScaryScore")
                         .HasColumnType("float");
 
+                    b.Property<int>("ShareCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

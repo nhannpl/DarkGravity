@@ -28,6 +28,18 @@ public class Program
 
         var host = builder.Build();
 
+
+
+        if (args.Contains("--migrate"))
+        {
+            Console.WriteLine("🚀 Running Migration: Mock Analysis -> Real Analysis");
+            using var scope = host.Services.CreateScope();
+            var migrationService = scope.ServiceProvider.GetRequiredService<MigrationService>();
+            await migrationService.MigrateMockStoriesAsync();
+            Console.WriteLine("👋 Migration Finished. Exiting.");
+            return;
+        }
+
         Console.WriteLine("🚀 DarkGravity Analyzer Started (Event-Driven Mode)");
         Console.WriteLine("📡 Listening for StoryFetched events on Kafka...");
 

@@ -1,0 +1,32 @@
+/* TTS Text Chunking & Word Highlighting */
+
+.chunk-container {
+  white-space: pre-wrap;
+}
+
+.chunk-span {
+  transition: opacity 0.3s ease;
+  opacity: 0.6;
+}
+
+.chunk-span.active-chunk {
+  opacity: 1;
+  color: #fff;
+}
+
+.chunk-span.clickable-chunk {
+  cursor: pointer;
+}
+
+.chunk-span.clickable-chunk:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::ng-deep .word-highlight {
+  background: rgba(var(--primary-glow-rgb, 98, 0, 234), 0.5);
+  color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(var(--primary-glow-rgb, 98, 0, 234), 0.3);
+  padding: 0 2px;
+}
