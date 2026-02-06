@@ -6,13 +6,18 @@ Since .NET User Secrets are stored outside the project folder in a machine-speci
 
 Run these from the project root after cloning:
 
-### 1. API Project (Database & CORS)
+### 1. API Project (Database, CORS & Google Cloud TTS)
 ```bash
 # Set the namespaced DB password
 dotnet user-secrets set "DARKGRAVITY_DB_PASSWORD" 'REMOVED_PASSWORD' --project src/Api
 
 # Set the Allowed Origins (Local Development)
 dotnet user-secrets set "AllowedOrigins:0" "http://localhost:4200" --project src/Api
+
+# Google Cloud Text-to-Speech API Key (for high-quality neural voices)
+# Get your free API key at: https://console.cloud.google.com/apis/library/texttospeech.googleapis.com
+# Free tier: 4 million characters/month for standard voices, 1 million for WaveNet voices
+dotnet user-secrets set "GoogleCloud:TtsApiKey" "YOUR_GOOGLE_CLOUD_API_KEY" --project src/Api
 ```
 
 ### 2. Analyzer Project (Database & AI API Keys)
@@ -50,7 +55,10 @@ These values are automatically mapped to the following JSON structure in memory 
   "DARKGRAVITY_DB_PASSWORD": "...",
   "AllowedOrigins": [
     "http://localhost:4200"
-  ]
+  ],
+  "GoogleCloud": {
+    "TtsApiKey": "..."
+  }
 }
 ```
 

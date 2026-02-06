@@ -5,7 +5,7 @@ namespace Api.Models;
 
 public class StoryQueryParameters
 {
-    private const int MaxPageSize = 100;
+    private const int MaxPageSize = 200;
     private const int MaxSearchTermLength = 200;
 
     [MaxLength(MaxSearchTermLength)]
@@ -13,6 +13,11 @@ public class StoryQueryParameters
 
     [Range(0, 10)]
     public double? MinScaryScore { get; set; }
+
+    [Range(0, 10)]
+    public double? MaxScaryScore { get; set; }
+
+    public string? Platform { get; set; }
 
     public string? SortBy { get; set; } = StorySortFields.Upvotes;
 

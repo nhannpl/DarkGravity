@@ -75,4 +75,33 @@ public class StoryProcessorTests
         Assert.True(await _db.Stories.AnyAsync(s => s.ExternalId == "existing" && s.Title == "Old"));
         Assert.True(await _db.Stories.AnyAsync(s => s.ExternalId == "unique"));
     }
+
+    [Fact]
+    public async Task ProcessAndSaveStoriesAsync_ShouldProduceEvents_WhenNewStoriesSaved()
+    {
+        // Arrange
+        const string ExternalId = "evt1";
+        const string Title = "Title 1";
+        var stories = new List<Story>
+        {
+            new Story { ExternalId = ExternalId, Title = Title, BodyText = "Body 1", Url = "Url 1" }
+        };
+
+        // Act
+        await _processor.ProcessAndSaveStoriesAsync(stories);
+
+        // Assert
+        _mockProducer.Verify(p => p.Produce(
+            It.Is<StoryFetched>(e => e.Title == Title), 
+            It.IsAny<CancellationToken>()), 
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task RepairDatabaseAsync_ShouldNotThrow()
+    {
+        // Act & Assert
+        var exception = await Record.ExceptionAsync(() => _processor.RepairDatabaseAsync());
+        Assert.Null(exception);
+    }
 }

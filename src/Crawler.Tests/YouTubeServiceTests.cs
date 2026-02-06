@@ -81,6 +81,44 @@ public class YouTubeServiceTests
         // Assert
         Assert.Empty(result);
     }
+
+    [Fact]
+    public async Task GetStoriesFromChannelAsync_ShouldReturnStories_WithTranscriptContent_WhenFound()
+    {
+        // Arrange
+        var query = "horror stories";
+        var videoId = new VideoId("xyz98765432");
+        var searchResults = new List<VideoSearchResult>
+        {
+            new VideoSearchResult(videoId, "Transcript Video", new Author(new ChannelId("chan2"), "Horror Channel 2"), TimeSpan.FromMinutes(5), new Thumbnail[] { })
+        };
+        _mockYoutube.Setup(y => y.SearchVideosAsync(query)).Returns(searchResults.ToAsyncEnumerable());
+
+        var video = new Video(videoId, "Transcript Video", new Author(new ChannelId("chan2"), "Horror Channel 2"), DateTimeOffset.Now, "Desc", TimeSpan.FromMinutes(5), new Thumbnail[] { }, new[] { "horror" }, new Engagement(500, 50, 5));
+        _mockYoutube.Setup(y => y.GetVideoAsync(videoId)).ReturnsAsync(video);
+
+        // Mock Manifest
+        // Mock Manifest
+        var trackInfo = new ClosedCaptionTrackInfo("https://test.com", new Language("en", "English"), false);
+        var manifest = new ClosedCaptionManifest(new[] { trackInfo });
+        _mockYoutube.Setup(y => y.GetClosedCaptionManifestAsync(videoId)).ReturnsAsync(manifest);
+
+        // Mock Track
+        var captions = new[] {
+            new ClosedCaption("Caption 1 content.", TimeSpan.Zero, TimeSpan.FromSeconds(1), Array.Empty<ClosedCaptionPart>()),
+            new ClosedCaption("Caption 2 content.", TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), Array.Empty<ClosedCaptionPart>())
+        };
+        var track = new ClosedCaptionTrack(captions);
+        _mockYoutube.Setup(y => y.GetClosedCaptionTrackAsync(trackInfo)).ReturnsAsync(track);
+
+        // Act
+        var result = await _service.GetStoriesFromChannelAsync(query, 1);
+
+        // Assert
+        Assert.Single(result);
+        Assert.Contains("Caption 1 content.", result[0].BodyText);
+        Assert.Contains("Caption 2 content.", result[0].BodyText);
+    }
 }
 
 // Helper to convert IEnumerable to IAsyncEnumerable for testing

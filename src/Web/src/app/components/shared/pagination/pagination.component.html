@@ -1,0 +1,27 @@
+<div class="pagination-container">
+  <!-- Navigation Controls (Only show if multiple pages) -->
+  <ng-container *ngIf="totalPages > 0">
+    <button class="page-nav prev" [disabled]="currentPage === 1" (click)="onPrev()" aria-label="Previous page">
+      <span class="nav-icon">«</span> PREV
+    </button>
+
+    <div class="page-numbers">
+      <button *ngFor="let page of pages()" class="page-btn" [class.active]="page === currentPage"
+        [class.dots]="page === '...'" [disabled]="page === '...'" (click)="onPageClick(page)">
+        {{ page }}
+      </button>
+    </div>
+
+    <button class="page-nav next" [disabled]="currentPage === totalPages" (click)="onNext()" aria-label="Next page">
+      NEXT <span class="nav-icon">»</span>
+    </button>
+  </ng-container>
+
+  <div class="page-size-selector">
+    <select (change)="onPageSizeChange($event)" class="size-select">
+      <option *ngFor="let size of pageSizeOptions" [value]="size" [selected]="size === pageSize">
+        {{ size }} / page
+      </option>
+    </select>
+  </div>
+</div>

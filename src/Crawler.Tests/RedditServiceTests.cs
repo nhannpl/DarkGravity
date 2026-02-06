@@ -10,6 +10,14 @@ namespace Crawler.Tests;
 
 public class RedditServiceTests
 {
+    private const string TestSubredditUrl = "https://reddit.com/r/nosleep.json";
+    private const string TestId = "123";
+    private const string TestTitle = "Scary Story";
+    private const string TestAuthor = "GhostWriter";
+    private const string TestPermalink = "/r/nosleep/comments/123/scary_story/";
+    private const string TestBody = "Long ago...";
+    private const int TestUps = 100;
+
     [Fact]
     public async Task GetTopStoriesAsync_ReturnsStories_OnSuccess()
     {
@@ -61,7 +69,7 @@ public class RedditServiceTests
         var redditService = new RedditService(httpClient);
 
         // Act
-        var result = await redditService.GetTopStoriesAsync("https://reddit.com/r/nosleep.json");
+        var result = await redditService.GetTopStoriesAsync(TestSubredditUrl);
 
         // Assert
         Assert.Single(result);
@@ -90,7 +98,113 @@ public class RedditServiceTests
         var redditService = new RedditService(httpClient);
 
         // Act
-        var result = await redditService.GetTopStoriesAsync("https://reddit.com/r/nosleep.json");
+        var result = await redditService.GetTopStoriesAsync(TestSubredditUrl);
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetTopStoriesAsync_HandlesMissingFields_ByUsingDefaults()
+    {
+        // Arrange
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        var jsonResponse = @"
+        {
+            ""data"": {
+                ""children"": [
+                    {
+                        ""data"": {
+                            ""id"": null,
+                            ""title"": null,
+                            ""author"": null,
+                            ""permalink"": ""/r/test"",
+                            ""selftext"": null,
+                            ""ups"": 0,
+                            ""stickied"": false
+                        }
+                    }
+                ]
+            }
+        }";
+
+        mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(jsonResponse),
+            });
+
+        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var redditService = new RedditService(httpClient);
+
+        // Act
+        var result = await redditService.GetTopStoriesAsync(TestSubredditUrl);
+
+        // Assert
+        Assert.Single(result);
+        Assert.NotNull(result[0].ExternalId); // Should generate a Guid if id is null
+        Assert.Equal("Unknown", result[0].Title);
+        Assert.Equal("Unknown", result[0].Author);
+        Assert.Equal("", result[0].BodyText);
+    }
+
+    [Fact]
+    public async Task GetTopStoriesAsync_ReturnsEmptyList_OnMalformedJson()
+    {
+        // Arrange
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent("invalid json { ["),
+            });
+
+        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var redditService = new RedditService(httpClient);
+
+        // Act
+        var result = await redditService.GetTopStoriesAsync(TestSubredditUrl);
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetTopStoriesAsync_ReturnsEmptyList_OnEmptyData()
+    {
+        // Arrange
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        var jsonResponse = @"{ ""data"": { ""children"": [] } }";
+
+        mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(jsonResponse),
+            });
+
+        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+        var redditService = new RedditService(httpClient);
+
+        // Act
+        var result = await redditService.GetTopStoriesAsync(TestSubredditUrl);
 
         // Assert
         Assert.Empty(result);
